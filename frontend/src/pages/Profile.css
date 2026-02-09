@@ -1,0 +1,446 @@
+/* ===============================
+   Profile Page Styles
+================================ */
+.profile-page {
+  min-height: calc(100vh - 76px);
+  background: linear-gradient(135deg, #f8fafc 0%, #e3e9f7 100%);
+  padding-bottom: 40px;
+}
+
+/* ===============================
+   Header
+================================ */
+.profile-header {
+  padding: 20px 0;
+}
+
+.page-title {
+  font-weight: 800;
+  color: #1a237e;
+  display: flex;
+  align-items: center;
+}
+
+.page-subtitle {
+  color: #5c6bc0;
+  font-size: 1.1rem;
+  margin-top: 10px;
+}
+
+/* ===============================
+   Profile Card
+================================ */
+.profile-card {
+  border: none;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.profile-avatar {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-avatar-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.profile-avatar {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.profile-avatar-img {
+  object-fit: cover;
+  border: 2px solid #e9ecef;
+}
+
+.avatar-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #f1f3f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  border: 2px solid #e9ecef;
+}
+
+/* Upload icon */
+.avatar-upload-btn {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 34px;
+  height: 34px;
+  background: #0d6efd;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.avatar-upload-btn:hover {
+  transform: scale(1.08);
+  background: #0b5ed7;
+}
+
+.avatar-upload-btn svg {
+  font-size: 16px;
+}
+
+
+.avatar-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #4ecdc4, #44a08d);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.5rem;
+  margin: 0 auto;
+}
+
+.avatar-status {
+  position: absolute;
+  bottom: 10px;
+  right: 25px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid white;
+}
+
+.avatar-status.online {
+  background-color: #28a745;
+}
+
+.profile-name {
+  font-weight: 800;
+  color: #1a237e;
+  margin: 15px 0 5px;
+}
+
+.profile-email,
+.profile-phone {
+  font-size: 0.95rem;
+  margin-bottom: 5px;
+}
+
+.profile-join-date {
+  font-size: 0.85rem;
+}
+
+/* ===============================
+   Quick Stats
+================================ */
+.profile-quick-stats {
+  border-top: 1px solid #e3e9f7;
+  border-bottom: 1px solid #e3e9f7;
+  padding: 20px 0;
+}
+
+.quick-stat h5 {
+  font-weight: 800;
+  color: #1a237e;
+  margin-bottom: 5px;
+}
+
+.quick-stat small {
+  font-size: 0.85rem;
+}
+
+.profile-actions .btn {
+  border-radius: 10px;
+  padding: 10px;
+}
+
+/* ===============================
+   Profile Details Card
+================================ */
+.profile-details-card {
+  border: none;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  min-height: 500px;
+}
+
+/* ===============================
+   Tabs
+================================ */
+.profile-tabs .nav-link {
+  color: #5c6bc0;
+  font-weight: 600;
+  padding: 15px 20px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.profile-tabs .nav-link:hover {
+  color: #1a237e;
+  background: rgba(78, 205, 196, 0.1);
+}
+
+.profile-tabs .nav-link.active {
+  color: #1a237e;
+  background: none;
+  border-bottom: 3px solid #4ecdc4;
+}
+
+.tab-content {
+  padding: 0 10px;
+}
+
+/* ===============================
+   List Group Items
+================================ */
+.profile-details-card .list-group-item {
+  border: none;
+  border-bottom: 1px solid #e3e9f7;
+  padding: 15px 0;
+}
+
+.profile-details-card .list-group-item:last-child {
+  border-bottom: none;
+}
+
+/* ===============================
+   Stat Cards
+================================ */
+.stat-card {
+  border: none;
+  border-radius: 15px;
+  background: white;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon-wrapper {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon.primary {
+  background: linear-gradient(45deg, #4ecdc4, #44a08d);
+  color: white;
+}
+
+.stat-icon.danger {
+  background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+  color: white;
+}
+
+.stat-icon.success {
+  background: linear-gradient(45deg, #28a745, #20c997);
+  color: white;
+}
+
+.stat-icon.info {
+  background: linear-gradient(45deg, #17a2b8, #0dcaf0);
+  color: white;
+}
+
+.stat-icon.warning {
+  background: linear-gradient(45deg, #ffc107, #ff9800);
+  color: white;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1a237e;
+  margin: 10px 0 5px;
+  text-align: center;
+}
+
+.stat-title {
+  color: #5c6bc0;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+/* ===============================
+   Security Tips
+================================ */
+.security-tip {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.security-tip:last-child {
+  margin-bottom: 0;
+}
+
+.security-tip-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.security-tip-icon.primary {
+  background: rgba(78, 205, 196, 0.15);
+  color: #4ecdc4;
+}
+
+.security-tip-icon.success {
+  background: rgba(40, 167, 69, 0.15);
+  color: #28a745;
+}
+
+.security-tip-icon.warning {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+.security-tip-content h6 {
+  font-weight: 600;
+  color: #1a237e;
+  margin-bottom: 5px;
+}
+
+/* ===============================
+   Settings Sections
+================================ */
+.settings-section {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.settings-section:last-child {
+  margin-bottom: 0;
+}
+
+.settings-section h6 {
+  font-weight: 700;
+  color: #1a237e;
+}
+
+/* ===============================
+   Statistics Insights
+================================ */
+.statistics-insights ul {
+  padding-left: 20px;
+}
+
+.statistics-insights li {
+  margin-bottom: 8px;
+  color: #5c6bc0;
+}
+
+/* ===============================
+   Profile Bio
+================================ */
+.profile-bio {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+/* ===============================
+   Form Controls
+================================ */
+.profile-page .form-control {
+  border: 2px solid #e3e9f7;
+  border-radius: 10px;
+  padding: 10px 15px;
+  transition: all 0.3s ease;
+}
+
+.profile-page .form-control:focus {
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 0.25rem rgba(78, 205, 196, 0.25);
+}
+
+/* ===============================
+   Modal Customization
+================================ */
+.profile-page .modal-content {
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* ===============================
+   Responsive Design
+================================ */
+@media (max-width: 768px) {
+  .profile-header {
+    text-align: center;
+  }
+
+  .profile-details-card {
+    margin-top: 20px;
+  }
+
+  .profile-tabs .nav-link {
+    padding: 12px 15px;
+    font-size: 0.9rem;
+  }
+
+  .stat-card {
+    padding: 15px;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+
+  .avatar-circle {
+    width: 100px;
+    height: 100px;
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-title {
+    font-size: 1.6rem;
+  }
+
+  .page-subtitle {
+    font-size: 1rem;
+  }
+
+  .profile-actions .btn {
+    margin-bottom: 10px;
+  }
+}
