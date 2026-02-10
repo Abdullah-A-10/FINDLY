@@ -29,17 +29,17 @@ FINDLY solves this problem by providing a structured system where users can repo
 ## 🛠️ Tech Stack
 
 ### Frontend
-- React (Vite)
-- JavaScript (ES6+)
-- HTML5
-- CSS3
+- ⚛ **React (Vite)** – Modern UI library
+- 💻 **JavaScript (ES6+)** – Frontend logic
+- 🌐 **HTML5** – Markup
+- 🎨 **CSS3 / Tailwind** – Styling
 
 ### Backend
-- Node.js
-- Express.js
-- MySQL
-- JWT Authentication
-- Multer (File Upload Handling)
+- 🟢 **Node.js** – Runtime environment
+- ⚡ **Express.js** – Web framework
+- 🐬 **MySQL** – Relational database
+- 🔑 **JWT Authentication** – Secure user sessions
+- 📂 **Multer** – File upload handling
 
 ---
 
