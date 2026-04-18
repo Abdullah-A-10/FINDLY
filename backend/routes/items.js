@@ -209,7 +209,7 @@ router.post(
                     return {lostItem , score};
 
                 })
-              ).then(results =>  results.filter(match => match.score>=70));
+              ).then(results =>  results.filter(match => match.score>=60));
             
 
             // If matches are found, create match records and notify 
@@ -352,20 +352,20 @@ router.post(
            'claim_approved']
         );
 
-        await pool.query(
-            `INSERT INTO notifications 
-            (user_id, message, type) 
-            VALUES (?, ?, ?)`,
-            [lostItem.user_id, 
-            `Your lost ${lostItem.item_name} has been claimed! Contact the finder to get the possessiion of your item. Contact No. : ${foundItem.contact} .`, 
-            'claim_approved']
-        );
-
         // Share finder's contact 
 
         const [finder] = await pool.query(
         `SELECT * FROM users WHERE id = ?`,
         [foundItem.user_id]
+        );
+
+        await pool.query(
+            `INSERT INTO notifications 
+            (user_id, message, type) 
+            VALUES (?, ?, ?)`,
+            [lostItem.user_id, 
+            `Your lost ${lostItem.item_name} has been claimed! Contact the finder to get the possessiion of your item. Contact No. : ${finder[0].phone} .`, 
+            'claim_approved']
         );
 
         res.status(200).json({ 

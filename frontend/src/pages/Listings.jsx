@@ -2,10 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import {
   getImageUrls,
   formatDate,
-  getItemLocation,
-  getItemDate
 } from '../utils/itemHelpers';
-import {ItemDetailsModal , StatusBadge} from '../components/ItemDetailsModal';
+import { ItemDetailsModal, StatusBadge } from '../components/ItemDetailsModal';
 import {
   Container,
   Row,
@@ -27,7 +25,6 @@ import {
   FaSearch,
   FaFilter,
   FaMapMarkerAlt,
-  FaCalendarAlt,
   FaTag,
   FaEye,
   FaPlus,
@@ -45,17 +42,8 @@ import './Listings.css';
 
 // Constants
 const CATEGORIES = [
-  'Electronics',
-  'Documents',
-  'Jewelry',
-  'Clothing',
-  'Accessories',
-  'Bags & Wallets',
-  'Keys',
-  'Books',
-  'Toys',
-  'Sports Equipment',
-  'Other'
+  'Electronics', 'Documents', 'Jewelry', 'Clothing', 'Accessories',
+  'Bags & Wallets', 'Keys', 'Books', 'Toys', 'Sports Equipment', 'Other'
 ];
 
 const STATUS_OPTIONS = {
@@ -63,23 +51,28 @@ const STATUS_OPTIONS = {
   found: ['Reported', 'Matched', 'Returned']
 };
 
-
 const Listings = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   
   // State
   const [activeTab, setActiveTab] = useState('lost');
-  const [items, setItems] = useState({ lost: [], found: [] });
-  const [filteredItems, setFilteredItems] = useState({ lost: [], found: [] });
-  const [loading, setLoading] = useState({ lost: true, found: true });
-  const [error, setError] = useState({ lost: '', found: '' });
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [showItemModal, setShowItemModal] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const [claimNotice , setClaimNotice] = useState({type:" ", info:" "});
+  const [claimNotice, setClaimNotice] = useState({ type: '', info: '' });
   
+  // SIMPLE pagination state - one object for current tab
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const limit = 12;
+  
+  // Filter state
   const [filters, setFilters] = useState({
     search: '',
     category: '',
@@ -89,81 +82,98 @@ const Listings = () => {
     status: ''
   });
   
-  const [pagination, setPagination] = useState({
-    lost: { page: 1, limit: 12, total: 0, totalPages: 1 },
-    found: { page: 1, limit: 12, total: 0, totalPages: 1 }
+  // Separate counts for each tab
+  const [tabCounts, setTabCounts] = useState({
+    lost: 0,
+    found: 0
   });
   
-  const [sortConfig, setSortConfig] = useState({
-    lost: { field: 'created_at', direction: 'desc' },
-    found: { field: 'created_at', direction: 'desc' }
-  });
-  
-  // Fetch items
-  useEffect(() => {
-    if (user) {
-      fetchItems(activeTab);
-    }
-  }, [user, activeTab, pagination[activeTab].page]);
+  // Sort state
+  const [sortField, setSortField] = useState('created_at');
+  const [sortDirection, setSortDirection] = useState('desc');
 
-  const fetchItems = async (tab) => {
-    const loadingKey = tab === 'lost' ? 'lost' : 'found';
-    const errorKey = tab === 'lost' ? 'lost' : 'found';
+  // Fetch counts for both tabs
+  useEffect(() => {
+    const fetchCounts = async () => {
+      if (!user) return;
+      
+      try {
+        const lostRes = await api.get('/items/lost/search?limit=1');
+        const foundRes = await api.get('/items/found/search?limit=1');
+        
+        setTabCounts({
+          lost: lostRes.data.pagination?.total || 0,
+          found: foundRes.data.pagination?.total || 0
+        });
+      } catch (err) {
+        console.error('Error fetching counts:', err);
+      }
+    };
     
-    setLoading(prev => ({ ...prev, [loadingKey]: true }));
-    setError(prev => ({ ...prev, [errorKey]: '' }));
+    fetchCounts();
+  }, [user]);
+
+  // Fetch items 
+  const fetchItems = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    setError('');
     
     try {
       const params = new URLSearchParams({
-        page: pagination[tab].page,
-        limit: pagination[tab].limit,
-        ...(filters.search && { item_name: filters.search }),
-        ...(filters.category && { category: filters.category }),
-        ...(filters.location && { location: filters.location }),
-        ...(filters.startDate && { start_date: filters.startDate }),
-        ...(filters.endDate && { end_date: filters.endDate }),
-        ...(filters.status && { status: filters.status })
-      }).toString();
+        page: page,
+        limit: limit
+      });
 
-      const endpoint = tab === 'lost' ? '/items/lost/search' : '/items/found/search';
+      // Add filters
+      if (filters.search?.trim()) params.append('item_name', filters.search.trim());
+      if (filters.category) params.append('category', filters.category);
+      if (filters.location?.trim()) params.append('location', filters.location.trim());
+      if (filters.startDate) params.append('start_date', filters.startDate);
+      if (filters.endDate) params.append('end_date', filters.endDate);
+      if (filters.status) params.append('status', filters.status);
+
+      const endpoint = activeTab === 'lost' ? '/items/lost/search' : '/items/found/search';
       const response = await api.get(`${endpoint}?${params}`);
       
-      const itemsList = response.data.items || [];
-      setItems(prev => ({ ...prev, [tab]: itemsList }));
-      setFilteredItems(prev => ({ ...prev, [tab]: itemsList }));
+      setItems(response.data.items || []);
+      setTotalPages(response.data.pagination?.totalPages || 1);
+      setTotalItems(response.data.pagination?.total || 0);
       
-      setPagination(prev => ({
-        ...prev,
-        [tab]: {
-          ...prev[tab],
-          total: response.data.pagination?.total || 0,
-          totalPages: response.data.pagination?.totalPages || 1
-        }
-      }));
     } catch (err) {
-      const errorMsg = `Failed to load ${tab} items. Please try again.`;
-      setError(prev => ({ ...prev, [errorKey]: errorMsg }));
-      console.error(`Error fetching ${tab} items:`, err);
+      setError(`Failed to load ${activeTab} items. Please try again.`);
+      console.error('Error:', err);
     } finally {
-      setLoading(prev => ({ ...prev, [loadingKey]: false }));
+      setLoading(false);
     }
   };
 
-  // Handlers
+  // Fetch when tab, page, or filters change
+  useEffect(() => {
+    fetchItems();
+  }, [activeTab, page, filters]); // Dependencies are explicit
+
+  // Handle tab change 
+  const handleTabChange = (tab) => {
+    if (tab === activeTab) return;
+    setActiveTab(tab);
+    setPage(1); // Reset to page 1 when changing tabs
+  };
+
+  // Handle filter changes with debounce
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
+    setPage(1); // Reset to page 1 when filters change
   };
 
+  // Apply filters from modal
   const applyFilters = () => {
-    setPagination(prev => ({
-      lost: { ...prev.lost, page: 1 },
-      found: { ...prev.found, page: 1 }
-    }));
-    fetchItems(activeTab);
     setShowFilters(false);
   };
 
+  // Reset all filters
   const resetFilters = () => {
     setFilters({
       search: '',
@@ -173,189 +183,149 @@ const Listings = () => {
       endDate: '',
       status: ''
     });
-    
-    setPagination(prev => ({
-      lost: { ...prev.lost, page: 1 },
-      found: { ...prev.found, page: 1 }
-    }));
-    
-    fetchItems(activeTab);
+    setPage(1);
     setShowFilters(false);
   };
 
-  const handleSort = (field) => {
-    const currentConfig = sortConfig[activeTab];
-    const direction = currentConfig.field === field && currentConfig.direction === 'asc' ? 'desc' : 'asc';
-    
-    setSortConfig(prev => ({
-      ...prev,
-      [activeTab]: { field, direction }
-    }));
+  // Remove individual filter
+  const removeFilter = (filterName) => {
+    setFilters(prev => ({ ...prev, [filterName]: '' }));
+    setPage(1);
+  };
 
-    const itemsToSort = [...filteredItems[activeTab]];
-    
-    const sortedItems = itemsToSort.sort((a, b) => {
+  // SIMPLE page change handler
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === page) return;
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Handle sorting
+  const handleSort = (field) => {
+    if (field === sortField) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+
+    // Sort current items
+    const sorted = [...items].sort((a, b) => {
       if (field === 'created_at') {
         const dateA = new Date(a.created_at);
         const dateB = new Date(b.created_at);
-        return direction === 'asc' ? dateA - dateB : dateB - dateA;
+        return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
       }
-      
       if (field === 'item_name') {
-        const nameA = a.item_name.toLowerCase();
-        const nameB = b.item_name.toLowerCase();
-        if (nameA < nameB) return direction === 'asc' ? -1 : 1;
-        if (nameA > nameB) return direction === 'asc' ? 1 : -1;
-        return 0;
+        const nameA = a.item_name?.toLowerCase() || '';
+        const nameB = b.item_name?.toLowerCase() || '';
+        return sortDirection === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
       }
-      
       return 0;
     });
-
-    setFilteredItems(prev => ({ ...prev, [activeTab]: sortedItems }));
+    
+    setItems(sorted);
   };
 
-  const handlePageChange = (page) => {
-    setPagination(prev => ({
-      ...prev,
-      [activeTab]: { ...prev[activeTab], page }
-    }));
-  };
-
+  // Modal handlers
   const viewItemDetails = (item) => {
     setSelectedItem(item);
-    setCarouselIndex(0); 
+    setCarouselIndex(0);
     setShowItemModal(true);
   };
 
   const handleClaimItem = async (foundItemId) => {
-  try {
-    // Clear previous notices
-    setClaimNotice({
-      type: 'info',
-      info: 'Checking for a matching lost item...'
-    });
+    try {
+      setClaimNotice({ type: 'info', info: 'Checking for a matching lost item...' });
 
-    const response = await api.post('/items/claim/public', {
-      found_item_id: foundItemId
-    });
+      const response = await api.post('/items/claim/public', { found_item_id: foundItemId });
+      const { status, error } = response.data;
 
-    const { status, match_id, error, message } = response.data;
-
-    // New match created - show success and navigate
-    if (status === 'match_created') {
-      setClaimNotice({
-        type: 'success',
-        info: 'Potential match found! Please verify ownership.'
+      if (status === 'match_created') {
+        setClaimNotice({ type: 'success', info: 'Potential match found! Please verify ownership.' });
+        setTimeout(() => navigate('/matches'), 1500);
+      } else if (status === 'match_exists') {
+        setClaimNotice({ type: 'info', info: 'You already have a match for this item. Redirecting...' });
+        setTimeout(() => navigate('/matches'), 800);
+      } else if (status === 'rejected') {
+        setClaimNotice({ type: 'warning', info: error || 'Unable to create a match.' });
+      }
+    } catch (err) {
+      setClaimNotice({ 
+        type: 'danger', 
+        info: err.response?.data?.error || 'Something went wrong. Please try again.' 
       });
-      
-      // Give user time to see the message before navigating
-      setTimeout(() => {
-        navigate('/matches');
-      }, 1500);
-      
-      return;
     }
-
-    // Match already exists
-    if (status === 'match_exists') {
-      setClaimNotice({
-        type: 'info',
-        info: 'You already have a match for this item. Redirecting you...'
-      });
-
-      setTimeout(() => {
-        navigate('/matches');
-      }, 800);
-      return;
-    }
-
-    // Rejected (no lost item etc.)
-    if (status === 'rejected') {
-      setClaimNotice({
-        type: 'warning',
-        info: error || 'Unable to create a match. You may not have a matching lost item.'
-      });
-      return;
-    }
-
-  } catch (err) {
-    setClaimNotice({
-      type: 'danger',
-      info: err.response?.data?.error || 'Something went wrong. Please try again later.'
-    });
-  }
-};
-
-  // Image carousel handlers
-  const handleSelectCarousel = (selectedIndex) => {
-    setCarouselIndex(selectedIndex);
   };
 
-  const handlePrevCarousel = () => {
-    const imageUrls = getImageUrls(selectedItem?.image_urls);
-    setCarouselIndex(prev => (prev === 0 ? imageUrls.length - 1 : prev - 1));
+  const handleCarouselPrev = () => {
+    const urls = getImageUrls(selectedItem?.image_urls);
+    setCarouselIndex(prev => (prev === 0 ? urls.length - 1 : prev - 1));
   };
 
-  const handleNextCarousel = () => {
-    const imageUrls = getImageUrls(selectedItem?.image_urls);
-    setCarouselIndex(prev => (prev === imageUrls.length - 1 ? 0 : prev + 1));
+  const handleCarouselNext = () => {
+    const urls = getImageUrls(selectedItem?.image_urls);
+    setCarouselIndex(prev => (prev === urls.length - 1 ? 0 : prev + 1));
   };
 
-  const ItemCard = ({ item, type }) => {
-    const imageUrls = getImageUrls(item.image_urls);
-    const firstImageUrl = imageUrls[0] || null;
-    
+  // Active filters display
+  const ActiveFilters = () => {
+    const active = Object.entries(filters).filter(([_, v]) => v);
+    if (active.length === 0) return null;
+
+    return (
+      <div className="active-filters mt-3">
+        <small className="text-muted me-2">Active filters:</small>
+        {active.map(([key, value]) => (
+          <Badge key={key} bg="info" className="me-2 filter-badge">
+            {key === 'startDate' ? 'From' : key === 'endDate' ? 'To' : key}: {value}
+            <FaTimes className="ms-1 filter-remove" onClick={() => removeFilter(key)} />
+          </Badge>
+        ))}
+        <Button variant="link" size="sm" onClick={resetFilters}>
+          Clear all
+        </Button>
+      </div>
+    );
+  };
+
+  // Item Card Component
+  const ItemCard = ({ item }) => {
+    const urls = getImageUrls(item.image_urls);
+    const firstImage = urls[0];
+
     return (
       <Col xs={12} sm={6} md={4} lg={3} className="mb-4">
         <Card className="listing_card h-100">
           <div className="card-image-section">
-            {firstImageUrl ? (
+            {firstImage ? (
               <Card.Img
                 variant="top"
-                src={firstImageUrl}
+                src={firstImage}
                 alt={item.item_name}
                 className="item-image"
                 onError={(e) => {
                   e.target.style.display = 'none';
-                  const placeholder = e.target.parentElement.querySelector('.no-image-placeholder') ||
-                    document.createElement('div');
-                  placeholder.className = 'no-image-placeholder';
-                  placeholder.innerHTML = `
-                    <svg width="40" height="40" viewBox="0 0 16 16" fill="#6c757d">
-                      <path d="M4.502 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
-                      <path fill-rule="evenodd" d="M.86 2.5a.5.5 0 0 1 .5-.5h14a.5.5 0 0 1 .5.5v10a.5.5 0 0 1-.5.5h-14a.5.5 0 0 1-.5-.5v-10zm13 10V3H2v9.5l2.5-2.5 2 2L9 8l4.5 4.5z"/>
-                    </svg>
-                    <span>No Image</span>
-                  `;
-                  if (!e.target.parentElement.querySelector('.no-image-placeholder')) {
-                    e.target.parentElement.appendChild(placeholder);
-                  }
+                  e.target.parentElement.querySelector('.no-image-placeholder')?.classList.remove('d-none');
                 }}
               />
-            ) : (
-              <div className="no-image-placeholder">
-                <FaImage size={40} />
-                <span>No Image</span>
-              </div>
-            )}
+            ) : null}
+            <div className={`no-image-placeholder ${firstImage ? 'd-none' : ''}`}>
+              <FaImage size={40} />
+              <span>No Image</span>
+            </div>
             
-            {imageUrls.length > 1 && (
+            {urls.length > 1 && (
               <Badge bg="dark" className="image-count-badge">
-                {imageUrls.length} <FaImage size={12} />
+                {urls.length} <FaImage size={12} />
               </Badge>
             )}
             
             <div className="card-overlay">
               <div className="status-overlay">
-                <StatusBadge status={item.status} type={type} />
+                <StatusBadge status={item.status} type={activeTab} />
               </div>
-              <Button
-                variant="light"
-                size="sm"
-                className="view-btn"
-                onClick={() => viewItemDetails(item)}
-              >
+              <Button variant="light" size="sm" className="view-btn" onClick={() => viewItemDetails(item)}>
                 <FaEye /> View
               </Button>
             </div>
@@ -377,19 +347,19 @@ const Listings = () => {
             
             <div className="item-meta mt-auto">
               <div className="location">
-                <FaMapMarkerAlt size={22} style={{color: "#212529" }}  className="me-1" />
-                <small>{type === 'lost' ? item.lost_location : item.found_location}</small>
+                <FaMapMarkerAlt size={22} style={{color: "#212529" }} className="me-1" />
+                <small>{activeTab === 'lost' ? item.lost_location : item.found_location}</small>
               </div>
               <div className="date">
-                <FaClock className="me-1" size={22} style={{ color: "#5c5f66"}}/>
+                <FaClock size={22} style={{ color: "#5c5f66"}} className="me-1" />
                 <small>
-                  {type === 'lost'
+                  {activeTab === 'lost'
                     ? `Lost: ${formatDate(item.lost_date)}`
                     : `Found: ${formatDate(item.found_date)}`
                   }
                 </small>
               </div>
-              {type === 'found' && !item.is_public && (
+              {activeTab === 'found' && !item.is_public && (
                 <div className="private-warning">
                   <FaClock className="me-1 text-warning" />
                   <small className="text-warning">Private Match Window</small>
@@ -399,12 +369,12 @@ const Listings = () => {
             
             <div className="d-grid gap-2 mt-3">
               <Button
-                variant={type === 'lost' ? 'primary' : 'success'}
+                variant={activeTab === 'lost' ? 'primary' : 'success'}
                 onClick={() => viewItemDetails(item)}
               >
                 View Details
               </Button>
-              {type === 'found' && item.status === 'Reported' && (
+              {activeTab === 'found' && item.status === 'Reported' && (
                 <Button
                   variant="outline-success"
                   onClick={() => viewItemDetails(item)}
@@ -419,108 +389,48 @@ const Listings = () => {
     );
   };
 
+  // Pagination Component
   const PaginationComponent = () => {
-    const currentPagination = pagination[activeTab];
-    const currentItems = filteredItems[activeTab];
-    
-    if (currentItems.length === 0 || currentPagination.totalPages <= 1) return null;
-    
+    if (items.length === 0 || totalPages <= 1) return null;
+
     const pages = [];
-    const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPagination.page - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(currentPagination.totalPages, startPage + maxVisiblePages - 1);
+    const maxVisible = 5;
+    let start = Math.max(1, page - Math.floor(maxVisible / 2));
+    let end = Math.min(totalPages, start + maxVisible - 1);
     
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
     }
-    
-    for (let i = startPage; i <= endPage; i++) {
+
+    for (let i = start; i <= end; i++) {
       pages.push(
-        <Pagination.Item
-          key={i}
-          active={i === currentPagination.page}
+        <Pagination.Item 
+          key={i} 
+          active={i === page} 
           onClick={() => handlePageChange(i)}
         >
           {i}
         </Pagination.Item>
       );
     }
-    
+
     return (
       <div className="pagination-wrapper mt-4">
         <Pagination className="justify-content-center">
-          <Pagination.First
-            onClick={() => handlePageChange(1)}
-            disabled={currentPagination.page === 1}
-          />
-          <Pagination.Prev
-            onClick={() => handlePageChange(currentPagination.page - 1)}
-            disabled={currentPagination.page === 1}
-          />
+          <Pagination.First onClick={() => handlePageChange(1)} disabled={page === 1} />
+          <Pagination.Prev onClick={() => handlePageChange(page - 1)} disabled={page === 1} />
           {pages}
-          <Pagination.Next
-            onClick={() => handlePageChange(currentPagination.page + 1)}
-            disabled={currentPagination.page === currentPagination.totalPages}
-          />
-          <Pagination.Last
-            onClick={() => handlePageChange(currentPagination.totalPages)}
-            disabled={currentPagination.page === currentPagination.totalPages}
-          />
+          <Pagination.Next onClick={() => handlePageChange(page + 1)} disabled={page === totalPages} />
+          <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={page === totalPages} />
         </Pagination>
-        
         <div className="text-center text-muted mt-2">
-          Showing {(currentPagination.page - 1) * currentPagination.limit + 1} to{' '}
-          {Math.min(currentPagination.page * currentPagination.limit, currentPagination.total)} of{' '}
-          {currentPagination.total} items
+          Showing {items.length > 0 ? (page - 1) * limit + 1 : 0} to{' '}
+          {Math.min(page * limit, totalItems)} of {totalItems} items
         </div>
       </div>
     );
   };
 
-  const ActiveFilters = () => {
-    const hasActiveFilters = filters.search || filters.category || filters.status ||
-                           filters.location || filters.startDate || filters.endDate;
-    
-    if (!hasActiveFilters) return null;
-    
-    return (
-      <div className="active-filters mt-3">
-        <small className="text-muted me-2">Active filters:</small>
-        {filters.search && (
-          <Badge bg="info" className="me-2">
-            Search: {filters.search}
-            <FaTimes className="ms-1" onClick={() => setFilters(prev => ({ ...prev, search: '' }))} />
-          </Badge>
-        )}
-        {filters.category && (
-          <Badge bg="info" className="me-2">
-            Category: {filters.category}
-            <FaTimes className="ms-1" onClick={() => setFilters(prev => ({ ...prev, category: '' }))} />
-          </Badge>
-        )}
-        {filters.status && (
-          <Badge bg="info" className="me-2">
-            Status: {filters.status}
-            <FaTimes className="ms-1" onClick={() => setFilters(prev => ({ ...prev, status: '' }))} />
-          </Badge>
-        )}
-        {(filters.location || filters.startDate || filters.endDate) && (
-          <Badge bg="warning" className="me-2" onClick={() => setShowFilters(true)}>
-            More filters active <FaFilter className="ms-1" />
-          </Badge>
-        )}
-        <Button variant="link" size="sm" onClick={resetFilters}>
-          Clear all filters
-        </Button>
-      </div>
-    );
-  };
-
-  // Current state
-  const currentItems = filteredItems[activeTab];
-  const currentLoading = loading[activeTab];
-  const currentError = error[activeTab];
-  const totalItems = pagination[activeTab].total;
   const reportPath = activeTab === 'lost' ? '/lost/report' : '/found/report';
 
   return (
@@ -560,7 +470,7 @@ const Listings = () => {
           <Card.Body className="p-0">
             <Tabs
               activeKey={activeTab}
-              onSelect={setActiveTab}
+              onSelect={handleTabChange}
               className="listings-tabs"
               fill
             >
@@ -571,7 +481,7 @@ const Listings = () => {
                     <FaSearch className="me-2" />
                     Lost Items
                     <Badge bg="warning" className="ms-2">
-                      {pagination.lost.total}
+                      {tabCounts.lost}
                     </Badge>
                   </div>
                 }
@@ -583,7 +493,7 @@ const Listings = () => {
                     <FaBell className="me-2" />
                     Found Items
                     <Badge bg="success" className="ms-2">
-                      {pagination.found.total}
+                      {tabCounts.found}
                     </Badge>
                   </div>
                 }
@@ -592,7 +502,7 @@ const Listings = () => {
           </Card.Body>
         </Card>
 
-        {/* Search and Filters */}
+        {/* Filters */}
         <Card className="mb-4 shadow-sm">
           <Card.Body>
             <Row className="g-3 align-items-center">
@@ -604,122 +514,81 @@ const Listings = () => {
                     name="search"
                     value={filters.search}
                     onChange={handleFilterChange}
-                    onKeyPress={(e) => e.key === 'Enter' && applyFilters()}
                   />
                 </InputGroup>
               </Col>
-              
               <Col md={4} lg={3}>
-                <Form.Select
-                  name="category"
-                  value={filters.category}
-                  onChange={handleFilterChange}
-                >
+                <Form.Select name="category" value={filters.category} onChange={handleFilterChange}>
                   <option value="">All Categories</option>
-                  {CATEGORIES.map((cat, index) => (
-                    <option key={index} value={cat}>{cat}</option>
-                  ))}
+                  {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                 </Form.Select>
               </Col>
-              
               <Col md={2} lg={2}>
-                <Form.Select
-                  name="status"
-                  value={filters.status}
-                  onChange={handleFilterChange}
-                >
+                <Form.Select name="status" value={filters.status} onChange={handleFilterChange}>
                   <option value="">All Status</option>
-                  {STATUS_OPTIONS[activeTab].map((status, index) => (
-                    <option key={index} value={status}>{status}</option>
-                  ))}
+                  {STATUS_OPTIONS[activeTab].map(status => <option key={status} value={status}>{status}</option>)}
                 </Form.Select>
               </Col>
-              
               <Col md={4} lg={3} className="d-flex gap-2">
                 <Button
                   variant="outline-primary"
                   onClick={() => setShowFilters(true)}
                   className="flex-grow-1"
                 >
-                  <FaFilter className="me-2" />
-                  More Filters
+                  <FaFilter className="me-2" /> More Filters
                 </Button>
-                
                 <Dropdown>
-                  <Dropdown.Toggle variant="outline-secondary" id="dropdown-sort">
-                    {sortConfig[activeTab].direction === 'asc' ? (
-                      <FaSortAmountUp className="me-2" />
-                    ) : (
-                      <FaSortAmountDown className="me-2" />
-                    )}
-                    Sort
+                  <Dropdown.Toggle variant="outline-secondary">
+                    {sortDirection === 'asc' ? <FaSortAmountUp /> : <FaSortAmountDown />} Sort
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
                     <Dropdown.Item onClick={() => handleSort('created_at')}>
-                      Date {sortConfig[activeTab].field === 'created_at' && sortConfig[activeTab].direction === 'desc' ? '(Newest)' : '(Oldest)'}
+                      Date {sortField === 'created_at' ? (sortDirection === 'desc' ? '(Newest)' : '(Oldest)') : ''}
                     </Dropdown.Item>
                     <Dropdown.Item onClick={() => handleSort('item_name')}>
-                      Name {sortConfig[activeTab].field === 'item_name' && sortConfig[activeTab].direction === 'desc' ? '(Z-A)' : '(A-Z)'}
+                      Name {sortField === 'item_name' ? (sortDirection === 'desc' ? '(Z-A)' : '(A-Z)') : ''}
                     </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
               </Col>
             </Row>
-            
             <ActiveFilters />
           </Card.Body>
         </Card>
 
-        {/* Loading State */}
-        {currentLoading && (
+        {/* Content */}
+        {loading && (
           <div className="text-center py-5">
             <Spinner animation="border" variant="primary" />
             <p className="mt-3">Loading {activeTab} items...</p>
           </div>
         )}
 
-        {/* Error State */}
-        {currentError && !currentLoading && (
+        {error && !loading && (
           <Alert variant="danger" className="text-center">
-            {currentError}
-            <Button variant="outline-danger" size="sm" className="ms-3" onClick={() => fetchItems(activeTab)}>
-              Retry
-            </Button>
+            {error} <Button variant="outline-danger" size="sm" onClick={fetchItems}>Retry</Button>
           </Alert>
         )}
 
-        {/* No Results */}
-        {!currentLoading && !currentError && currentItems.length === 0 && (
+        {!loading && !error && items.length === 0 && (
           <Card className="text-center py-5">
             <Card.Body>
               <FaSearch size={60} className="text-muted mb-3" />
               <h4>No {activeTab} items found</h4>
               <p className="text-muted">
-                {Object.values(filters).some(Boolean)
-                  ? 'Try changing your filters or search terms.'
-                  : `No ${activeTab} items have been reported yet. Be the first to report one!`
-                }
+                {Object.values(filters).some(Boolean) ? 'Try changing your filters.' : `No ${activeTab} items reported yet.`}
               </p>
-              <Button
-                as={Link}
-                to={reportPath}
-                variant={activeTab === 'lost' ? 'danger' : 'success'}
-                className="mt-3"
-              >
-                <FaPlus className="me-2" />
-                Report {activeTab === 'lost' ? 'Lost' : 'Found'} Item
+              <Button as={Link} to={reportPath} variant={activeTab === 'lost' ? 'danger' : 'success'} className="mt-3">
+                <FaPlus className="me-2" /> Report {activeTab === 'lost' ? 'Lost' : 'Found'} Item
               </Button>
             </Card.Body>
           </Card>
         )}
 
-        {/* Items Grid */}
-        {!currentLoading && !currentError && currentItems.length > 0 && (
+        {!loading && !error && items.length > 0 && (
           <>
             <Row>
-              {currentItems.map(item => (
-                <ItemCard key={item.id} item={item} type={activeTab} />
-              ))}
+              {items.map(item => <ItemCard key={item.id} item={item} />)}
             </Row>
             <PaginationComponent />
           </>
@@ -727,155 +596,127 @@ const Listings = () => {
       </Container>
 
       {/* Filters Modal */}
-      <FiltersModal
-        show={showFilters}
-        onHide={() => setShowFilters(false)}
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onApply={applyFilters}
-        onReset={resetFilters}
-      />
+      <Modal show={showFilters} onHide={() => setShowFilters(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title><FaFilter className="me-2" />Advanced Filters</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Row className="g-3">
+            <Col md={6}>
+              <Form.Group>
+                <Form.Label>Location</Form.Label>
+                <Form.Control 
+                  type="text" 
+                  name="location" 
+                  value={filters.location} 
+                  onChange={handleFilterChange} 
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group>
+                <Form.Label>Date Range</Form.Label>
+                <Row className="g-2">
+                  <Col>
+                    <Form.Control 
+                      type="date" 
+                      name="startDate" 
+                      value={filters.startDate} 
+                      onChange={handleFilterChange} 
+                      placeholder="Start" 
+                    />
+                  </Col>
+                  <Col>
+                    <Form.Control 
+                      type="date" 
+                      name="endDate" 
+                      value={filters.endDate} 
+                      onChange={handleFilterChange} 
+                      placeholder="End" 
+                    />
+                  </Col>
+                </Row>
+              </Form.Group>
+            </Col>
+          </Row>
+          
+          <div className="mt-4">
+            <h6>Quick Filters</h6>
+            <div className="d-flex flex-wrap gap-2 mt-2">
+              <Button
+                variant="outline-primary"
+                size="sm"
+                onClick={() => {
+                  const today = new Date();
+                  const weekAgo = new Date(today);
+                  weekAgo.setDate(today.getDate() - 7);
+                  setFilters(prev => ({ 
+                    ...prev, 
+                    startDate: weekAgo.toISOString().split('T')[0],
+                    endDate: today.toISOString().split('T')[0]
+                  }));
+                }}
+              >
+                Last 7 Days
+              </Button>
+              <Button
+                variant="outline-primary"
+                size="sm"
+                onClick={() => {
+                  const today = new Date();
+                  const monthAgo = new Date(today);
+                  monthAgo.setDate(today.getDate() - 30);
+                  setFilters(prev => ({ 
+                    ...prev, 
+                    startDate: monthAgo.toISOString().split('T')[0],
+                    endDate: today.toISOString().split('T')[0]
+                  }));
+                }}
+              >
+                Last 30 Days
+              </Button>
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                onClick={() => {
+                  setFilters(prev => ({ 
+                    ...prev, 
+                    startDate: '',
+                    endDate: ''
+                  }));
+                }}
+              >
+                Clear Dates
+              </Button>
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowFilters(false)}>Cancel</Button>
+          <Button variant="outline-secondary" onClick={resetFilters}>Reset All</Button>
+          <Button variant="primary" onClick={applyFilters}>Apply Filters</Button>
+        </Modal.Footer>
+      </Modal>
 
-      {/* Item Details Modal with Carousel */}
+      {/* Item Details Modal */}
       <ItemDetailsModal
         show={showItemModal}
-       onHide={() => {
-        setShowItemModal(false);
-        setClaimNotice({ type: '', info: '' }); 
-       }}
+        onHide={() => {
+          setShowItemModal(false);
+          setClaimNotice({ type: '', info: '' });
+        }}
         item={selectedItem}
         type={activeTab}
         onClaim={() => selectedItem && handleClaimItem(selectedItem.id)}
         carouselIndex={carouselIndex}
-        onSelectCarousel={handleSelectCarousel}
-        onPrevCarousel={handlePrevCarousel}
-        onNextCarousel={handleNextCarousel}
-        claimNotice={claimNotice} 
-        onClaimNoticeClose={() => setClaimNotice({ type: '', info: '' })} 
+        onSelectCarousel={setCarouselIndex}
+        onPrevCarousel={handleCarouselPrev}
+        onNextCarousel={handleCarouselNext}
+        claimNotice={claimNotice}
+        onClaimNoticeClose={() => setClaimNotice({ type: '', info: '' })}
       />
     </div>
   );
 };
-
-// Modal Components
-const FiltersModal = ({ show, onHide, filters, onFilterChange, onApply, onReset }) => (
-  <Modal show={show} onHide={onHide} size="lg">
-    <Modal.Header closeButton>
-      <Modal.Title>
-        <FaFilter className="me-2" />
-        Advanced Filters
-      </Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-      <Row className="g-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label>Location</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter location..."
-              name="location"
-              value={filters.location}
-              onChange={onFilterChange}
-            />
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label>Date Range</Form.Label>
-            <Row className="g-2">
-              <Col>
-                <Form.Control
-                  type="date"
-                  placeholder="Start Date"
-                  name="startDate"
-                  value={filters.startDate}
-                  onChange={onFilterChange}
-                />
-              </Col>
-              <Col>
-                <Form.Control
-                  type="date"
-                  placeholder="End Date"
-                  name="endDate"
-                  value={filters.endDate}
-                  onChange={onFilterChange}
-                />
-              </Col>
-            </Row>
-          </Form.Group>
-        </Col>
-      </Row>
-      
-      <div className="mt-4">
-        <h6>Quick Filters</h6>
-        <div className="d-flex flex-wrap gap-2 mt-2">
-          <Button
-            variant={filters.startDate ? 'primary' : 'outline-primary'}
-            size="sm"
-            onClick={() => {
-              const today = new Date();
-              const weekAgo = new Date(today);
-              weekAgo.setDate(today.getDate() - 7);
-              onFilterChange({
-                target: {
-                  name: 'startDate',
-                  value: weekAgo.toISOString().split('T')[0]
-                }
-              });
-              onFilterChange({
-                target: {
-                  name: 'endDate',
-                  value: today.toISOString().split('T')[0]
-                }
-              });
-            }}
-          >
-            Last 7 Days
-          </Button>
-          <Button
-            variant={filters.startDate ? 'primary' : 'outline-primary'}
-            size="sm"
-            onClick={() => {
-              const today = new Date();
-              const monthAgo = new Date(today);
-              monthAgo.setDate(today.getDate() - 30);
-              onFilterChange({
-                target: {
-                  name: 'startDate',
-                  value: monthAgo.toISOString().split('T')[0]
-                }
-              });
-              onFilterChange({
-                target: {
-                  name: 'endDate',
-                  value: today.toISOString().split('T')[0]
-                }
-              });
-            }}
-          >
-            Last 30 Days
-          </Button>
-          <Button
-            variant="outline-secondary"
-            size="sm"
-            onClick={() => {
-              onFilterChange({ target: { name: 'startDate', value: '' } });
-              onFilterChange({ target: { name: 'endDate', value: '' } });
-            }}
-          >
-            Clear Dates
-          </Button>
-        </div>
-      </div>
-    </Modal.Body>
-    <Modal.Footer>
-      <Button variant="secondary" onClick={onHide}>Cancel</Button>
-      <Button variant="outline-secondary" onClick={onReset}>Reset All</Button>
-      <Button variant="primary" onClick={onApply}>Apply Filters</Button>
-    </Modal.Footer>
-  </Modal>
-);
-
 
 export default Listings;

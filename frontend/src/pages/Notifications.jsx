@@ -80,7 +80,7 @@ const Notifications = () => {
   const markAsRead = async (id) => {
     setActionLoading(prev => ({ ...prev, [id]: true }));
     try {
-      // Optimistic UI
+    
       setNotifications(prev =>
         prev.map(n => (n.id === id ? { ...n, status: 'read' } : n))
       );

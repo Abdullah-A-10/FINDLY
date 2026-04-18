@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaCheck } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaCheck, FaEye, FaEyeSlash } from 'react-icons/fa';
 import api from '../api';
 import './AuthPages.css';
 
@@ -10,6 +10,8 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -181,15 +183,25 @@ const Signup = () => {
                       <FaLock className="me-2" />
                       Password
                     </Form.Label>
-                    <Form.Control
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Create a strong password"
-                      required
-                      className="form-control-custom"
-                    />
+                    <div className="password-input-wrapper">
+                      <Form.Control
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="Create a strong password"
+                        required
+                        className="form-control-custom password-input"
+                      />
+                      <Button
+                        variant="link"
+                        className="password-toggle-btn"
+                        onClick={() => setShowPassword(!showPassword)}
+                        type="button"
+                      >
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      </Button>
+                    </div>
                     {/* Password Strength Meter */}
                     {formData.password && (
                       <div className="mt-2">
@@ -219,15 +231,25 @@ const Signup = () => {
                       <FaLock className="me-2" />
                       Confirm Password
                     </Form.Label>
-                    <Form.Control
-                      type="password"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      placeholder="Confirm your password"
-                      required
-                      className="form-control-custom"
-                    />
+                    <div className="password-input-wrapper">
+                      <Form.Control
+                        type={showConfirmPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        placeholder="Confirm your password"
+                        required
+                        className="form-control-custom password-input"
+                      />
+                      <Button
+                        variant="link"
+                        className="password-toggle-btn"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        type="button"
+                      >
+                        {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                      </Button>
+                    </div>
                   </Form.Group>
 
                   {/* Terms & Conditions */}

@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FaLock, FaEnvelope, FaSignInAlt, FaGoogle, FaFacebookF } from 'react-icons/fa';
+import { FaLock, FaEnvelope, FaSignInAlt, FaGoogle, FaFacebookF, FaEye, FaEyeSlash } from 'react-icons/fa';
 import api from '../api';
 import './AuthPages.css';
 
@@ -11,6 +11,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -23,6 +24,10 @@ const Login = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleSubmit = async (e) => {
@@ -98,21 +103,32 @@ const Login = () => {
                     />
                   </Form.Group>
 
-                  {/* Password */}
+                  {/* Password  */}
                   <Form.Group className="mb-3">
                     <Form.Label className="form-label-custom">
                       <FaLock className="me-2" />
                       Password
                     </Form.Label>
-                    <Form.Control
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Enter your password"
-                      required
-                      className="form-control-custom"
-                    />
+                    <div className="password-input-wrapper">
+                      <Form.Control
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="Enter your password"
+                        required
+                        className="form-control-custom password-input"
+                      />
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="password-toggle-btn"
+                        onClick={togglePasswordVisibility}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      </Button>
+                    </div>
                     <div className="text-end mt-2">
                       <Link to="/forgot-password" className="forgot-link">
                         Forgot password?

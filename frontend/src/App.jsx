@@ -103,8 +103,8 @@ function App() {
               } 
             
             />
-            {/* Catch-all Redirect */}
-            <Route path="*" element={<Navigate to="/" />} />
+            {/* Catch-all Redirect 
+            <Route path="*" element={<Navigate to="/" />} />*/}
           </Routes>
         </main>
         <Footer />
