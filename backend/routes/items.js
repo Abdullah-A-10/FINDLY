@@ -2,7 +2,7 @@ const express = require('express');
 const {pool} = require('../db');
 const bcrypt = require('bcryptjs');
 const stringSimilarity = require('string-similarity')
-const { uploadImages,deleteUploadedFiles } = require('../utils/storage');  
+const upload = require('../middleware/upload');  
 const authenticateUser = require('../middleware/authenticateUser');
 const {calculateMatchScore} = require('../utils/matching');
 const { body, validationResult } = require('express-validator');
@@ -12,7 +12,7 @@ const router = express.Router();
 router.post(
     '/lost',
     authenticateUser,
-    uploadImages,
+    upload.array("images",5),
     [
         body("item_name").notEmpty().withMessage("Item name is required"),
         body("category").notEmpty().withMessage("Category is required"),
@@ -31,7 +31,7 @@ router.post(
         const images = req.files || []; 
         let image_urls = '[]';
         if (req.files && req.files.length > 0) {
-        image_urls = JSON.stringify(images.map(file => `/uploads/${file.filename}`));
+        image_urls = JSON.stringify(images.map(file => file.path));
         }
 
         const user_id = req.user.id;
@@ -131,7 +131,7 @@ router.post(
 router.post(
     '/found',
     authenticateUser,
-    uploadImages,
+    upload.array("images",5),
     [
         body("item_name").notEmpty().withMessage("Item name is required"),
         body("category").notEmpty().withMessage("Category is required"),

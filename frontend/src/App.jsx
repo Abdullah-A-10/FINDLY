@@ -1,26 +1,28 @@
-import React, { useContext } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Container } from 'react-bootstrap';
-import { AuthContext } from './context/AuthContext';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Home from './pages/Home';
-import ReportLost from './pages/ReportLost';
-import ReportFound from './pages/ReportFound';
-import Listings from './pages/Listings';
-import './App.css';
-import Matches from './pages/Matches';
-import Notifications from './pages/Notifications';
-import Profile from './pages/Profile';
-import MyListings from './pages/MyListings';
-import MyClaims from './pages/MyClaims';
-
+import React, { useContext } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Container } from "react-bootstrap";
+import { AuthContext } from "./context/AuthContext";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Home from "./pages/Home";
+import ReportLost from "./pages/ReportLost";
+import ReportFound from "./pages/ReportFound";
+import Listings from "./pages/Listings";
+import "./App.css";
+import Matches from "./pages/Matches";
+import Notifications from "./pages/Notifications";
+import Profile from "./pages/Profile";
+import MyListings from "./pages/MyListings";
+import MyClaims from "./pages/MyClaims";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const { user } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
+
+  if (loading) return null; // or a spinner
+
   return user ? children : <Navigate to="/login" />;
 };
 
@@ -35,76 +37,72 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            
+
             {/* Protected Routes */}
-            <Route 
-              path="/profile" 
+            <Route
+              path="/profile"
               element={
                 <ProtectedRoute>
-                  <Profile/>
+                  <Profile />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/listings" 
+            <Route
+              path="/listings"
               element={
                 <ProtectedRoute>
-                  < Listings />
+                  <Listings />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/claims" 
+            <Route
+              path="/claims"
               element={
                 <ProtectedRoute>
-                  <MyClaims/>
+                  <MyClaims />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/lost/report" 
+            <Route
+              path="/lost/report"
               element={
                 <ProtectedRoute>
-                  <ReportLost/>
+                  <ReportLost />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/found/report" 
+            <Route
+              path="/found/report"
               element={
                 <ProtectedRoute>
                   <ReportFound />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/mylistings" 
+            <Route
+              path="/mylistings"
               element={
                 <ProtectedRoute>
-                  <MyListings/>
+                  <MyListings />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/matches" 
-               element={
+            <Route
+              path="/matches"
+              element={
                 <ProtectedRoute>
-                  <Matches/>
+                  <Matches />
                 </ProtectedRoute>
-              } 
-            
+              }
             />
-            <Route 
-              path="/notifications" 
-               element={
+            <Route
+              path="/notifications"
+              element={
                 <ProtectedRoute>
-                  <Notifications/>
+                  <Notifications />
                 </ProtectedRoute>
-              } 
-            
+              }
             />
-            {/* Catch-all Redirect 
-            <Route path="*" element={<Navigate to="/" />} />*/}
           </Routes>
         </main>
         <Footer />

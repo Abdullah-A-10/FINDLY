@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from "react";
 import {
   Container,
   Row,
@@ -15,8 +15,8 @@ import {
   Modal,
   Image,
   ListGroup,
-  InputGroup
-} from 'react-bootstrap';
+  InputGroup,
+} from "react-bootstrap";
 import {
   FaUser,
   FaEnvelope,
@@ -40,50 +40,50 @@ import {
   FaUnlock,
   FaHistory,
   FaTrash,
-  FaCamera
-} from 'react-icons/fa';
-import { AuthContext } from '../context/AuthContext';
-import api from '../api';
-import { BACKEND_URL } from '../api';
-import './Profile.css';
+  FaCamera,
+} from "react-icons/fa";
+import { AuthContext } from "../context/AuthContext";
+import api from "../api";
+import { BACKEND_URL } from "../api";
+import "./Profile.css";
 
 const Profile = () => {
-  const { user: authUser, logout } = useContext(AuthContext);
+  const { user: authUser, logout, updateUserProfile } = useContext(AuthContext);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
   // Edit states
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    phone: ''
+    username: "",
+    email: "",
+    phone: "",
   });
   const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
   const [deletePassword, setDeletePassword] = useState("");
-  
+
   // Stats
   const [stats, setStats] = useState({
     lostItems: 0,
     foundItems: 0,
     matches: 0,
     claims: 0,
-    successRate: 0
+    successRate: 0,
   });
-  
+
   // Modals
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
-  
+
   // Tabs
-  const [activeTab, setActiveTab] = useState('overview');
-  
+  const [activeTab, setActiveTab] = useState("overview");
+
   // Fetch user profile and stats
   useEffect(() => {
     if (authUser) {
@@ -91,210 +91,241 @@ const Profile = () => {
       fetchStats();
     }
   }, [authUser]);
-  
+
   const fetchProfile = async () => {
     setLoading(true);
-    setError('');
-    
+    setError("");
+
     try {
-      const response = await api.get('/auth/profile');
+      const response = await api.get("/auth/profile");
       setUser(response.data.user);
       setFormData({
-        username: response.data.user.username || '',
-        email: response.data.user.email || '',
-        phone: response.data.user.phone || ''
+        username: response.data.user.username || "",
+        email: response.data.user.email || "",
+        phone: response.data.user.phone || "",
       });
     } catch (err) {
-      setError('Failed to load profile. Please try again.');
-      console.error('Error fetching profile:', err);
+      setError("Failed to load profile. Please try again.");
+      console.error("Error fetching profile:", err);
     } finally {
       setLoading(false);
     }
   };
-  
+
   const fetchStats = async () => {
     try {
       // Fetch user statistics
       const [lostRes, foundRes, matchesRes, claimsRes] = await Promise.all([
-        api.get('/items/mylistings/lost?limit=100'),
-        api.get('/items/mylistings/found?limit=100'),
-        api.get('/items/mylistings/matches?limit=100'),
-        api.get('/items/myclaims')
+        api.get("/items/mylistings/lost?limit=100"),
+        api.get("/items/mylistings/found?limit=100"),
+        api.get("/items/mylistings/matches?limit=100"),
+        api.get("/items/myclaims"),
       ]);
-      
+
       const lostItems = lostRes.data.lostItems?.length || 0;
       const foundItems = foundRes.data.foundItems?.length || 0;
       const matches = matchesRes.data.matches?.length || 0;
       const claimsMade = claimsRes.data.claims_made?.items?.length || 0;
       const claimsReceived = claimsRes.data.claims_received?.length || 0;
       const totalClaims = claimsMade + claimsReceived;
-      
+
       // Calculate success rate (items claimed or returned)
-      const claimedItems = lostRes.data.items?.filter(item => item.status === 'Claimed').length || 0;
-      const returnedItems = foundRes.data.items?.filter(item => item.status === 'Returned').length || 0;
-      const successRate = lostItems + foundItems > 0 
-        ? Math.round(((claimedItems + returnedItems) / (lostItems + foundItems)) * 100)
-        : 0;
-      
+      const claimedItems =
+        lostRes.data.items?.filter((item) => item.status === "Claimed")
+          .length || 0;
+      const returnedItems =
+        foundRes.data.items?.filter((item) => item.status === "Returned")
+          .length || 0;
+      const successRate =
+        lostItems + foundItems > 0
+          ? Math.round(
+              ((claimedItems + returnedItems) / (lostItems + foundItems)) * 100,
+            )
+          : 0;
+
       setStats({
         lostItems,
         foundItems,
         matches,
         claims: totalClaims,
-        successRate
+        successRate,
       });
     } catch (err) {
-      console.error('Error fetching stats:', err);
+      console.error("Error fetching stats:", err);
     }
   };
-  
+
   const handleEditToggle = () => {
     if (editing) {
       // Reset form data
       setFormData({
-        username: user.username || '',
-        email: user.email || '',
-        phone: user.phone || ''
+        username: user.username || "",
+        email: user.email || "",
+        phone: user.phone || "",
       });
     }
     setEditing(!editing);
   };
-  
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleProfilePicUpload = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
+    //  basic validation
+    if (!file.type.startsWith("image/")) {
+      setError("Please upload a valid image file");
+      return;
+    }
+
     const formData = new FormData();
-    formData.append('profile_pic', file);
+    formData.append("profile_pic", file);
 
     try {
-      const res = await api.put('/auth/profile-picture', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      setError("");
+      setSuccess("");
+      setLoading(true);
+
+      const res = await api.put("/auth/profile-picture", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      setUser(prev => ({
+      const imageUrl = res.data.profile_pic;
+
+      updateUserProfile({ profile_pic: imageUrl }); // Updates navbar
+
+      setUser((prev) => ({
         ...prev,
-        profile_pic: res.data.profile_pic
+        profile_pic: imageUrl,
       }));
 
-      setSuccess('Profile picture updated successfully');
-
+      setSuccess("Profile picture updated successfully");
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to upload image');
+      setError(err.response?.data?.error || "Failed to upload image");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
-    setPasswordForm(prev => ({ ...prev, [name]: value }));
+    setPasswordForm((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleSaveProfile = async () => {
-    setError('');
-    setSuccess('');
-    
+    setError("");
+    setSuccess("");
+
     // Validation
     if (!formData.username.trim()) {
-      setError('Username is required');
+      setError("Username is required");
       return;
     }
-    
+
     if (!formData.email.trim()) {
-      setError('Email is required');
+      setError("Email is required");
       return;
     }
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address');
+      setError("Please enter a valid email address");
       return;
     }
-    
+
     try {
-      const response = await api.put('/auth/profile', formData);
-      
+      const response = await api.put("/auth/profile", formData);
+
       setUser(response.data.user);
       setEditing(false);
-      setSuccess('Profile updated successfully!');
-      
+      setSuccess("Profile updated successfully!");
+
       // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(''), 3000);
-      
+      setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update profile. Please try again.');
+      setError(
+        err.response?.data?.error ||
+          "Failed to update profile. Please try again.",
+      );
     }
   };
-  
+
   const handleChangePassword = async () => {
-    setError('');
+    setError("");
 
     if (!passwordForm.currentPassword) {
-      setError('Current password is required');
+      setError("Current password is required");
       return;
     }
 
     if (!passwordForm.newPassword) {
-      setError('New password is required');
+      setError("New password is required");
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
-      setError('New password must be at least 6 characters long');
+      setError("New password must be at least 6 characters long");
       return;
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
 
     try {
-      await api.put('/auth/change-password', {
+      await api.put("/auth/change-password", {
         currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword
+        newPassword: passwordForm.newPassword,
       });
 
-      setSuccess('Password changed successfully!');
+      setSuccess("Password changed successfully!");
       setPasswordForm({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       });
       setShowChangePassword(false);
 
-      setTimeout(() => setSuccess(''), 3000);
-
+      setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to change password');
+      setError(err.response?.data?.error || "Failed to change password");
     }
   };
 
   const handleDeleteAccount = async () => {
     if (!deletePassword) {
-      setError('Password is required to delete account');
+      setError("Password is required to delete account");
       return;
     }
 
     try {
-      await api.delete('/auth/delete-account', {
-        data: { password: deletePassword }
+      await api.delete("/auth/delete-account", {
+        data: { password: deletePassword },
       });
 
       logout();
-      window.location.href = '/';
-
+      window.location.href = "/";
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to delete account');
+      setError(err.response?.data?.error || "Failed to delete account");
     }
   };
-  
+
   // Components
-  const StatCard = ({ title, value, icon: Icon, color, subtitle, progress }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    color,
+    subtitle,
+    progress,
+  }) => (
     <Card className="stat-card h-100">
       <Card.Body>
         <div className="stat-icon-wrapper">
@@ -306,9 +337,11 @@ const Profile = () => {
         <Card.Title className="stat-title">{title}</Card.Title>
         {subtitle && <small className="text-muted">{subtitle}</small>}
         {progress !== undefined && (
-          <ProgressBar 
-            now={progress} 
-            variant={progress >= 70 ? 'success' : progress >= 40 ? 'warning' : 'danger'}
+          <ProgressBar
+            now={progress}
+            variant={
+              progress >= 70 ? "success" : progress >= 40 ? "warning" : "danger"
+            }
             className="mt-2"
             label={`${progress}%`}
           />
@@ -316,7 +349,7 @@ const Profile = () => {
       </Card.Body>
     </Card>
   );
-  
+
   const SecurityTip = ({ title, description, icon: Icon, color }) => (
     <div className="security-tip">
       <div className={`security-tip-icon ${color}`}>
@@ -328,7 +361,7 @@ const Profile = () => {
       </div>
     </div>
   );
-  
+
   if (loading) {
     return (
       <div className="profile-page">
@@ -341,7 +374,7 @@ const Profile = () => {
       </div>
     );
   }
-  
+
   if (!user) {
     return (
       <div className="profile-page">
@@ -357,7 +390,7 @@ const Profile = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="profile-page">
       <Container fluid="xxl" className="py-4">
@@ -400,22 +433,32 @@ const Profile = () => {
             )}
           </Col>
         </Row>
-        
+
         {/* Success/Error Messages */}
         {success && (
-          <Alert variant="success" className="mb-4" onClose={() => setSuccess('')} dismissible>
+          <Alert
+            variant="success"
+            className="mb-4"
+            onClose={() => setSuccess("")}
+            dismissible
+          >
             <FaCheckCircle className="me-2" />
             {success}
           </Alert>
         )}
-        
+
         {error && (
-          <Alert variant="danger" className="mb-4" onClose={() => setError('')} dismissible>
+          <Alert
+            variant="danger"
+            className="mb-4"
+            onClose={() => setError("")}
+            dismissible
+          >
             <FaExclamationTriangle className="me-2" />
             {error}
           </Alert>
         )}
-        
+
         {/* Main Content */}
         <Row>
           {/* Left Column - Profile Info */}
@@ -427,7 +470,7 @@ const Profile = () => {
                   <div className="profile-avatar">
                     {user.profile_pic ? (
                       <Image
-                        src={`${BACKEND_URL}/${user.profile_pic}`}
+                        src={user.profile_pic}
                         roundedCircle
                         width={120}
                         height={120}
@@ -440,7 +483,10 @@ const Profile = () => {
                     )}
 
                     {/* Upload Icon */}
-                    <label htmlFor="profilePicUpload" className="avatar-upload-btn">
+                    <label
+                      htmlFor="profilePicUpload"
+                      className="avatar-upload-btn"
+                    >
                       <FaCamera />
                     </label>
 
@@ -453,29 +499,30 @@ const Profile = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* User Info */}
                 <h3 className="profile-name">{user.username}</h3>
                 <p className="profile-email text-muted">
                   <FaEnvelope className="me-2" />
                   {user.email}
                 </p>
-                
+
                 {user.phone && (
                   <p className="profile-phone text-muted">
                     <FaPhone className="me-2" />
                     {user.phone}
                   </p>
                 )}
-                
+
                 <div className="profile-join-date text-muted">
                   <FaCalendarAlt className="me-2" />
-                  Member since {new Date(user.created_at).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long' 
+                  Member since{" "}
+                  {new Date(user.created_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
                   })}
                 </div>
-                
+
                 {/* Quick Stats */}
                 <div className="profile-quick-stats mt-4">
                   <Row>
@@ -493,7 +540,7 @@ const Profile = () => {
                     </Col>
                   </Row>
                 </div>
-                
+
                 {/* Account Actions */}
                 <div className="profile-actions mt-4">
                   <Button
@@ -504,7 +551,7 @@ const Profile = () => {
                     <FaKey className="me-2" />
                     Change Password
                   </Button>
-                  
+
                   <Button
                     variant="outline-danger"
                     className="w-100"
@@ -516,7 +563,7 @@ const Profile = () => {
                 </div>
               </Card.Body>
             </Card>
-            
+
             {/* Security Tips */}
             <Card className="mt-4">
               <Card.Header>
@@ -547,7 +594,7 @@ const Profile = () => {
               </Card.Body>
             </Card>
           </Col>
-          
+
           {/* Right Column - Detailed Info */}
           <Col lg={8}>
             <Card className="profile-details-card">
@@ -561,7 +608,7 @@ const Profile = () => {
                   <Tab eventKey="overview" title="Overview">
                     <div className="tab-content mt-4">
                       <h5 className="mb-4">Profile Information</h5>
-                      
+
                       {editing ? (
                         <Form>
                           <Form.Group className="mb-3">
@@ -580,7 +627,7 @@ const Profile = () => {
                               This will be displayed to other users.
                             </Form.Text>
                           </Form.Group>
-                          
+
                           <Form.Group className="mb-3">
                             <Form.Label>
                               <FaEnvelope className="me-2" />
@@ -597,7 +644,7 @@ const Profile = () => {
                               We'll send notifications to this email.
                             </Form.Text>
                           </Form.Group>
-                          
+
                           <Form.Group className="mb-3">
                             <Form.Label>
                               <FaPhone className="me-2" />
@@ -624,7 +671,7 @@ const Profile = () => {
                             </div>
                             <span>{user.username}</span>
                           </ListGroup.Item>
-                          
+
                           <ListGroup.Item className="d-flex justify-content-between align-items-center">
                             <div>
                               <FaEnvelope className="me-3" />
@@ -632,31 +679,34 @@ const Profile = () => {
                             </div>
                             <span>{user.email}</span>
                           </ListGroup.Item>
-                          
+
                           <ListGroup.Item className="d-flex justify-content-between align-items-center">
                             <div>
                               <FaPhone className="me-3" />
                               <strong>Phone:</strong>
                             </div>
-                            <span>{user.phone || 'Not provided'}</span>
+                            <span>{user.phone || "Not provided"}</span>
                           </ListGroup.Item>
-                          
+
                           <ListGroup.Item className="d-flex justify-content-between align-items-center">
                             <div>
                               <FaCalendarAlt className="me-3" />
                               <strong>Member Since:</strong>
                             </div>
                             <span>
-                              {new Date(user.created_at).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
+                              {new Date(user.created_at).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                },
+                              )}
                             </span>
                           </ListGroup.Item>
                         </ListGroup>
                       )}
-                      
+
                       <div className="profile-bio mt-4">
                         <h6 className="mb-3">About Me</h6>
                         <p className="text-muted">
@@ -673,11 +723,11 @@ const Profile = () => {
                       </div>
                     </div>
                   </Tab>
-                  
+
                   <Tab eventKey="stats" title="Statistics">
                     <div className="tab-content mt-4">
                       <h5 className="mb-4">Your Activity Statistics</h5>
-                      
+
                       <Row className="mb-4">
                         <Col md={6} className="mb-3">
                           <StatCard
@@ -698,7 +748,7 @@ const Profile = () => {
                           />
                         </Col>
                       </Row>
-                      
+
                       <Row className="mb-4">
                         <Col md={6} className="mb-3">
                           <StatCard
@@ -719,7 +769,7 @@ const Profile = () => {
                           />
                         </Col>
                       </Row>
-                      
+
                       <Row>
                         <Col md={12}>
                           <StatCard
@@ -732,26 +782,36 @@ const Profile = () => {
                           />
                         </Col>
                       </Row>
-                      
+
                       <div className="statistics-insights mt-4">
                         <h6 className="mb-3">
                           <FaChartLine className="me-2" />
                           Insights
                         </h6>
                         <ul className="text-muted">
-                          <li>You've reported {stats.lostItems + stats.foundItems} items in total</li>
-                          <li>Your items have {stats.matches} potential matches</li>
-                          <li>{stats.successRate}% of your reported items were successfully resolved</li>
-                          <li>Keep reporting items to increase your success rate</li>
+                          <li>
+                            You've reported {stats.lostItems + stats.foundItems}{" "}
+                            items in total
+                          </li>
+                          <li>
+                            Your items have {stats.matches} potential matches
+                          </li>
+                          <li>
+                            {stats.successRate}% of your reported items were
+                            successfully resolved
+                          </li>
+                          <li>
+                            Keep reporting items to increase your success rate
+                          </li>
                         </ul>
                       </div>
                     </div>
                   </Tab>
-                  
+
                   <Tab eventKey="settings" title="Settings">
                     <div className="tab-content mt-4">
                       <h5 className="mb-4">Account Settings</h5>
-                      
+
                       <Form>
                         {/* Notification Settings */}
                         <div className="settings-section mb-4">
@@ -759,69 +819,69 @@ const Profile = () => {
                             <FaBell className="me-2" />
                             Notification Settings
                           </h6>
-                          
-                          <Form.Check 
+
+                          <Form.Check
                             type="switch"
                             id="email-notifications"
                             label="Email notifications for new matches"
                             defaultChecked
                             className="mb-2"
                           />
-                          
-                          <Form.Check 
+
+                          <Form.Check
                             type="switch"
                             id="push-notifications"
                             label="Push notifications for claims"
                             defaultChecked
                             className="mb-2"
                           />
-                          
-                          <Form.Check 
+
+                          <Form.Check
                             type="switch"
                             id="newsletter"
                             label="Receive newsletter and updates"
                             defaultChecked
                           />
                         </div>
-                        
+
                         {/* Privacy Settings */}
                         <div className="settings-section mb-4">
                           <h6 className="mb-3">
                             <FaLock className="me-2" />
                             Privacy Settings
                           </h6>
-                          
-                          <Form.Check 
+
+                          <Form.Check
                             type="switch"
                             id="show-profile"
                             label="Show my profile to other users"
                             defaultChecked
                             className="mb-2"
                           />
-                          
-                          <Form.Check 
+
+                          <Form.Check
                             type="switch"
                             id="show-email"
                             label="Show email to matched users"
                             defaultChecked
                             className="mb-2"
                           />
-                          
-                          <Form.Check 
+
+                          <Form.Check
                             type="switch"
                             id="show-phone"
                             label="Show phone number to matched users"
                             defaultChecked
                           />
                         </div>
-                        
+
                         {/* Display Settings */}
                         <div className="settings-section">
                           <h6 className="mb-3">
                             <FaCog className="me-2" />
                             Display Settings
                           </h6>
-                          
+
                           <Form.Group className="mb-3">
                             <Form.Label>Theme</Form.Label>
                             <Form.Select>
@@ -830,7 +890,7 @@ const Profile = () => {
                               <option>Auto (System)</option>
                             </Form.Select>
                           </Form.Group>
-                          
+
                           <Form.Group className="mb-3">
                             <Form.Label>Items per page</Form.Label>
                             <Form.Select>
@@ -840,7 +900,7 @@ const Profile = () => {
                             </Form.Select>
                           </Form.Group>
                         </div>
-                        
+
                         <Button variant="primary" className="mt-3">
                           <FaSave className="me-2" />
                           Save Settings
@@ -854,9 +914,12 @@ const Profile = () => {
           </Col>
         </Row>
       </Container>
-      
+
       {/* Change Password Modal */}
-      <Modal show={showChangePassword} onHide={() => setShowChangePassword(false)}>
+      <Modal
+        show={showChangePassword}
+        onHide={() => setShowChangePassword(false)}
+      >
         <Modal.Header closeButton>
           <Modal.Title>
             <FaKey className="me-2" />
@@ -875,7 +938,7 @@ const Profile = () => {
                 placeholder="Enter current password"
               />
             </Form.Group>
-            
+
             <Form.Group className="mb-3">
               <Form.Label>New Password</Form.Label>
               <Form.Control
@@ -889,7 +952,7 @@ const Profile = () => {
                 Password must be at least 6 characters long.
               </Form.Text>
             </Form.Group>
-            
+
             <Form.Group className="mb-3">
               <Form.Label>Confirm New Password</Form.Label>
               <Form.Control
@@ -900,15 +963,19 @@ const Profile = () => {
                 placeholder="Confirm new password"
               />
             </Form.Group>
-            
+
             <Alert variant="info" className="mt-3">
               <FaInfoCircle className="me-2" />
-              <strong>Tip:</strong> Use a strong password with a mix of letters, numbers, and symbols.
+              <strong>Tip:</strong> Use a strong password with a mix of letters,
+              numbers, and symbols.
             </Alert>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowChangePassword(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowChangePassword(false)}
+          >
             Cancel
           </Button>
           <Button variant="primary" onClick={handleChangePassword}>
@@ -917,9 +984,12 @@ const Profile = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-      
+
       {/* Delete Account Modal */}
-      <Modal show={showDeleteAccount} onHide={() => setShowDeleteAccount(false)}>
+      <Modal
+        show={showDeleteAccount}
+        onHide={() => setShowDeleteAccount(false)}
+      >
         <Modal.Header closeButton>
           <Modal.Title>
             <FaExclamationTriangle className="me-2 text-danger" />
@@ -931,30 +1001,33 @@ const Profile = () => {
             <FaExclamationTriangle className="me-2" />
             <strong>Warning:</strong> This action cannot be undone!
           </Alert>
-          
+
           <p className="text-muted">
             Are you sure you want to delete your account? This will:
           </p>
-          
+
           <ul className="text-muted">
             <li>Permanently delete your profile</li>
             <li>Remove all your reported items</li>
             <li>Delete your match history</li>
             <li>Cancel all pending claims</li>
           </ul>
-          
+
           <Form.Group className="mb-3">
             <Form.Label>Password</Form.Label>
             <Form.Control
               type="password"
               placeholder="Enter your password to confirm"
               value={deletePassword}
-              onChange={e => setDeletePassword(e.target.value)}
+              onChange={(e) => setDeletePassword(e.target.value)}
             />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteAccount(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowDeleteAccount(false)}
+          >
             Cancel
           </Button>
           <Button variant="danger" onClick={handleDeleteAccount}>

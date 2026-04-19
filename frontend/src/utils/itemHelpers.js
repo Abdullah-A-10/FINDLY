@@ -37,18 +37,11 @@ export const getImageUrls = (imageData, limit = 5) => {
   if (Array.isArray(imageData)) {
     urls = imageData;
   } else if (typeof imageData === 'string') {
-    const trimmed = imageData.trim();
-
-    // JSON array stored as string
-    if (trimmed.startsWith('[')) {
-      try {
-        const parsed = JSON.parse(trimmed);
-        urls = Array.isArray(parsed) ? parsed : [trimmed];
-      } catch {
-        urls = [trimmed];
-      }
-    } else {
-      urls = [trimmed];
+    try {
+      urls = JSON.parse(imageData);
+      if (!Array.isArray(urls)) urls = [imageData];
+    } catch {
+      urls = [imageData];
     }
   }
 
@@ -56,10 +49,13 @@ export const getImageUrls = (imageData, limit = 5) => {
     .filter(Boolean)
     .slice(0, limit)
     .map((url) => {
+      if (url.startsWith('http')) return url;
+
       const normalized = url.startsWith('/') ? url : `/${url}`;
       return `${BACKEND_URL}${normalized}`.replace(/\\/g, '/');
     });
 };
+
 
 /* ================= Item Utilities ================= */
 

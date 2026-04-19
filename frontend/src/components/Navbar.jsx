@@ -1,24 +1,25 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { 
-  Navbar, 
-  Nav, 
-  Container, 
-  Button, 
-  Badge, 
-  Dropdown, 
+import React, { useContext, useState, useEffect } from "react";
+import {
+  Navbar,
+  Nav,
+  Container,
+  Button,
+  Badge,
+  Dropdown,
   OverlayTrigger,
   Tooltip,
-  Offcanvas
-} from 'react-bootstrap';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import { 
-  FaBell, 
-  FaUser, 
-  FaSignOutAlt, 
-  FaHome, 
-  FaSearch, 
-  FaPlus, 
+  Offcanvas,
+  Image,
+} from "react-bootstrap";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
+import {
+  FaBell,
+  FaUser,
+  FaSignOutAlt,
+  FaHome,
+  FaSearch,
+  FaPlus,
   FaList,
   FaCog,
   FaQuestionCircle,
@@ -28,10 +29,10 @@ import {
   FaChartLine,
   FaHandshake,
   FaCheck,
-  FaListAlt
-} from 'react-icons/fa';
-import api from '../api';
-import './Navbar.css';
+  FaListAlt,
+} from "react-icons/fa";
+import api from "../api";
+import "./Navbar.css";
 
 const CustomNavbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -42,57 +43,68 @@ const CustomNavbar = () => {
   const [showOffcanvas, setShowOffcanvas] = useState(false);
 
   useEffect(() => {
-  if (!user) return;
+    if (!user) return;
 
-  const interval = setInterval(() => {
     fetchNotifications();
-  }, 20000); // fetch every 20 seconds
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 20000); // fetch every 20 seconds
 
-  // Cleanup
-  return () => clearInterval(interval);
- }, [user]);
+    // Cleanup
+    return () => clearInterval(interval);
+  }, [user]);
 
   const fetchNotifications = async () => {
     try {
-      const response = await api.get('/items/notifications');
+      const response = await api.get("/items/notifications");
       setNotifications(response.data.notifications || []);
       setUnreadCount(response.data.unread_count || 0);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error("Error fetching notifications:", error);
     }
   };
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
     setShowOffcanvas(false);
   };
 
   const markNotificationsAsRead = async () => {
     try {
-      await api.get('/items/notifications?mark_read=true');
+      await api.get("/items/notifications?mark_read=true");
       setUnreadCount(0);
       // Update notifications to show as read
-      setNotifications(prev => prev.map(notif => ({ ...notif, status: 'read' })));
+      setNotifications((prev) =>
+        prev.map((notif) => ({ ...notif, status: "read" }))
+      );
     } catch (error) {
-      console.error('Error marking notifications as read:', error);
+      console.error("Error marking notifications as read:", error);
     }
   };
 
   const isActive = (path) => {
-    return location.pathname === path ? 'active' : '';
+    return location.pathname === path ? "active" : "";
   };
 
   // Navigation items for logged in users
-  const navItems = user ? [
-    { path: '/', label: 'Dashboard', icon: <FaHome /> },
-    { path: '/listings', label: 'View Listings', icon: <FaList /> },
-    { path: '/matches', label: 'My Matches', icon: <FaHandshake /> },
-  ] : [];
+  const navItems = user
+    ? [
+        { path: "/", label: "Dashboard", icon: <FaHome /> },
+        { path: "/listings", label: "View Listings", icon: <FaList /> },
+        { path: "/matches", label: "My Matches", icon: <FaHandshake /> },
+      ]
+    : [];
 
   return (
     <>
-      <Navbar bg="dark" variant="dark" expand="lg" fixed="top" className="custom-navbar">
+      <Navbar
+        bg="dark"
+        variant="dark"
+        expand="lg"
+        fixed="top"
+        className="custom-navbar"
+      >
         <Container fluid="xxl">
           {/* Logo/Brand */}
           <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
@@ -112,7 +124,10 @@ const CustomNavbar = () => {
           </Button>
 
           {/* Desktop Navigation */}
-          <Navbar.Collapse id="basic-navbar-nav" className="justify-content-between">
+          <Navbar.Collapse
+            id="basic-navbar-nav"
+            className="justify-content-between"
+          >
             {/* Main Navigation Links */}
             <Nav className="me-auto">
               {navItems.map((item, index) => (
@@ -121,17 +136,19 @@ const CustomNavbar = () => {
                   placement="bottom"
                   overlay={<Tooltip>{item.label}</Tooltip>}
                 >
-                  <Nav.Link 
-                    as={Link} 
-                    to={item.path} 
+                  <Nav.Link
+                    as={Link}
+                    to={item.path}
                     className={`nav-link-custom ${isActive(item.path)}`}
                   >
                     {item.icon}
-                    <span className="ms-2 d-lg-inline d-none">{item.label}</span>
+                    <span className="ms-2 d-lg-inline d-none">
+                      {item.label}
+                    </span>
                   </Nav.Link>
                 </OverlayTrigger>
               ))}
-              
+
               {/* Report Item Dropdown */}
               {user && (
                 <Dropdown align="end" className="d-inline">
@@ -139,15 +156,21 @@ const CustomNavbar = () => {
                     placement="bottom"
                     overlay={<Tooltip>Report Item</Tooltip>}
                   >
-                    <Dropdown.Toggle variant="outline-light" id="dropdown-report" className="nav-link-custom report-toggle">
+                    <Dropdown.Toggle
+                      variant="outline-light"
+                      id="dropdown-report"
+                      className="nav-link-custom report-toggle"
+                    >
                       <FaPlus />
-                      <span className="ms-2 d-lg-inline d-none">Report Item</span>
+                      <span className="ms-2 d-lg-inline d-none">
+                        Report Item
+                      </span>
                     </Dropdown.Toggle>
                   </OverlayTrigger>
                   <Dropdown.Menu className="dropdown-menu-custom shadow-lg">
-                    <Dropdown.Item 
-                      as={Link} 
-                      to="/lost/report" 
+                    <Dropdown.Item
+                      as={Link}
+                      to="/lost/report"
                       className="dropdown-item-custom lost-item"
                       onClick={() => setShowOffcanvas(false)}
                     >
@@ -157,14 +180,16 @@ const CustomNavbar = () => {
                         </div>
                         <div>
                           <h6 className="mb-0">Report Lost Item</h6>
-                          <small className="text-muted">Can't find something?</small>
+                          <small className="text-muted">
+                            Can't find something?
+                          </small>
                         </div>
                       </div>
                     </Dropdown.Item>
                     <Dropdown.Divider />
-                    <Dropdown.Item 
-                      as={Link} 
-                      to="/found/report" 
+                    <Dropdown.Item
+                      as={Link}
+                      to="/found/report"
                       className="dropdown-item-custom found-item"
                       onClick={() => setShowOffcanvas(false)}
                     >
@@ -192,16 +217,16 @@ const CustomNavbar = () => {
                     placement="bottom"
                     overlay={<Tooltip>Notifications</Tooltip>}
                   >
-                    <Nav.Link 
-                      as={Link} 
-                      to="/notifications" 
+                    <Nav.Link
+                      as={Link}
+                      to="/notifications"
                       className="position-relative nav-link-custom"
                       onClick={markNotificationsAsRead}
                     >
                       <FaBell size={30} />
                       {unreadCount > 0 && (
                         <Badge pill bg="danger" className="notification-badge">
-                          {unreadCount > 9 ? '9+' : unreadCount}
+                          {unreadCount > 9 ? "9+" : unreadCount}
                         </Badge>
                       )}
                     </Nav.Link>
@@ -209,67 +234,135 @@ const CustomNavbar = () => {
 
                   {/* User Dropdown */}
                   <Dropdown align="end">
-                    <Dropdown.Toggle variant="outline-light" id="dropdown-user" className="user-toggle">
+                    <Dropdown.Toggle
+                      variant="outline-light"
+                      id="dropdown-user"
+                      className="user-toggle"
+                    >
                       <div className="d-flex align-items-center">
                         <div className="user-avatar">
-                          <FaUser />
+                          {user.profile_pic ? (
+                            <Image
+                              src={user.profile_pic}
+                              alt="profile"
+                              className="avatar-img"
+                              roundedCircle
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                                e.target.nextSibling.style.display = "flex";
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className="avatar-placeholder"
+                            style={{ display: user.profile_pic ? "none" : "flex" }}
+                          >
+                            <FaUser />
+                          </div>
                         </div>
                         <div className="d-none d-lg-block ms-2">
-                          <div className="user-name">{user.username || user.name}</div>
+                          <div className="user-name">{user.username}</div>
                           <small className="user-email">{user.email}</small>
                         </div>
                       </div>
                     </Dropdown.Toggle>
 
-                    <Dropdown.Menu className="dropdown-menu-custom shadow-lg" align="end">
+                    <Dropdown.Menu
+                      className="dropdown-menu-custom shadow-lg"
+                      align="end"
+                    >
                       <Dropdown.Header className="dropdown-header-custom">
                         <div className="d-flex align-items-center">
                           <div className="user-avatar-large">
-                            <FaUser size={24} />
+                            {user.profile_pic ? (
+                              <Image
+                                src={user.profile_pic}
+                                alt="profile"
+                                className="avatar-img-large"
+                                roundedCircle
+                                onError={(e) => {
+                                  e.target.style.display = "none";
+                                  e.target.nextSibling.style.display = "flex";
+                                }}
+                              />
+                            ) : null}
+                            <div
+                              className="avatar-placeholder-large"
+                              style={{ display: user.profile_pic ? "none" : "flex" }}
+                            >
+                              <FaUser size={24} />
+                            </div>
                           </div>
                           <div className="ms-3">
-                            <h6 className="mb-0">{user.username || user.name}</h6>
+                            <h6 className="mb-0">{user.username}</h6>
                             <small className="text-muted">{user.email}</small>
                           </div>
                         </div>
                       </Dropdown.Header>
                       <Dropdown.Divider />
-                      
-                      <Dropdown.Item as={Link} to="/profile" className="dropdown-item-custom">
+
+                      <Dropdown.Item
+                        as={Link}
+                        to="/profile"
+                        className="dropdown-item-custom"
+                      >
                         <FaUser className="me-3" />
                         <span>My Profile</span>
                       </Dropdown.Item>
-                      
-                      <Dropdown.Item as={Link} to="/mylistings" className="dropdown-item-custom">
+
+                      <Dropdown.Item
+                        as={Link}
+                        to="/mylistings"
+                        className="dropdown-item-custom"
+                      >
                         <FaList className="me-3" />
                         <span>My Listings</span>
                       </Dropdown.Item>
-                      
-                      <Dropdown.Item as={Link} to="/matches" className="dropdown-item-custom">
+
+                      <Dropdown.Item
+                        as={Link}
+                        to="/matches"
+                        className="dropdown-item-custom"
+                      >
                         <FaHandshake className="me-3" />
                         <span>Matches</span>
                       </Dropdown.Item>
-                      
-                      <Dropdown.Item as={Link} to="/claims" className="dropdown-item-custom">
+
+                      <Dropdown.Item
+                        as={Link}
+                        to="/claims"
+                        className="dropdown-item-custom"
+                      >
                         <FaChartLine className="me-3" />
                         <span>My Claims</span>
                       </Dropdown.Item>
-                      
+
                       <Dropdown.Divider />
-                      
-                      <Dropdown.Item as={Link} to="/settings" className="dropdown-item-custom">
+
+                      <Dropdown.Item
+                        as={Link}
+                        to="/settings"
+                        className="dropdown-item-custom"
+                      >
                         <FaCog className="me-3" />
                         <span>Settings</span>
                       </Dropdown.Item>
-                      
-                      <Dropdown.Item as={Link} to="/help" className="dropdown-item-custom">
+
+                      <Dropdown.Item
+                        as={Link}
+                        to="/help"
+                        className="dropdown-item-custom"
+                      >
                         <FaQuestionCircle className="me-3" />
                         <span>Help & Support</span>
                       </Dropdown.Item>
-                      
+
                       <Dropdown.Divider />
-                      
-                      <Dropdown.Item onClick={handleLogout} className="dropdown-item-custom logout-item">
+
+                      <Dropdown.Item
+                        onClick={handleLogout}
+                        className="dropdown-item-custom logout-item"
+                      >
                         <FaSignOutAlt className="me-3" />
                         <span>Logout</span>
                       </Dropdown.Item>
@@ -282,24 +375,24 @@ const CustomNavbar = () => {
                     placement="bottom"
                     overlay={<Tooltip>Login</Tooltip>}
                   >
-                    <Button 
-                      as={Link} 
-                      to="/login" 
-                      variant="outline-light" 
+                    <Button
+                      as={Link}
+                      to="/login"
+                      variant="outline-light"
                       className="nav-btn"
                     >
                       <FaUser className="me-1 d-lg-none" />
                       <span className="d-none d-lg-inline">Login</span>
                     </Button>
                   </OverlayTrigger>
-                  
+
                   <OverlayTrigger
                     placement="bottom"
                     overlay={<Tooltip>Sign Up</Tooltip>}
                   >
-                    <Button 
-                      as={Link} 
-                      to="/signup" 
+                    <Button
+                      as={Link}
+                      to="/signup"
                       variant="primary"
                       className="nav-btn-signup"
                     >
@@ -335,19 +428,36 @@ const CustomNavbar = () => {
               {/* User Info */}
               <div className="mobile-user-info mb-4">
                 <div className="user-avatar-large mb-3">
-                  <FaUser size={32} />
+                  {user.profile_pic ? (
+                    <Image
+                      src={user.profile_pic}
+                      alt="profile"
+                      className="avatar-img-large"
+                      roundedCircle
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        e.target.nextSibling.style.display = "flex";
+                      }}
+                    />
+                  ) : null}
+                  <div
+                    className="avatar-placeholder-large"
+                    style={{ display: user.profile_pic ? "none" : "flex" }}
+                  >
+                    <FaUser size={32} />
+                  </div>
                 </div>
-                <h5 className="text-white">{user.username || user.name}</h5>
+                <h5 className="text-white">{user.username}</h5>
                 <small className="text-light">{user.email}</small>
               </div>
 
               {/* Mobile Navigation */}
               <Nav className="flex-column gap-2">
                 {navItems.map((item, index) => (
-                  <Nav.Link 
+                  <Nav.Link
                     key={index}
-                    as={Link} 
-                    to={item.path} 
+                    as={Link}
+                    to={item.path}
                     className={`mobile-nav-link ${isActive(item.path)}`}
                     onClick={() => setShowOffcanvas(false)}
                   >
@@ -360,20 +470,20 @@ const CustomNavbar = () => {
                 <div className="mobile-report-section mt-3">
                   <h6 className="text-light mb-2">Report Items</h6>
                   <div className="d-grid gap-2">
-                    <Button 
-                      as={Link} 
-                      to="/lost/report" 
-                      variant="outline-light" 
+                    <Button
+                      as={Link}
+                      to="/lost/report"
+                      variant="outline-light"
                       className="mobile-report-btn lost-btn"
                       onClick={() => setShowOffcanvas(false)}
                     >
                       <FaSearch className="me-2" />
                       Report Lost Item
                     </Button>
-                    <Button 
-                      as={Link} 
-                      to="/found/report" 
-                      variant="outline-light" 
+                    <Button
+                      as={Link}
+                      to="/found/report"
+                      variant="outline-light"
                       className="mobile-report-btn found-btn"
                       onClick={() => setShowOffcanvas(false)}
                     >
@@ -387,7 +497,12 @@ const CustomNavbar = () => {
                 <div className="mt-4">
                   <h6 className="text-light mb-2">Quick Links</h6>
                   <Nav className="flex-column gap-1">
-                    <Nav.Link as={Link} to="/notifications" className="mobile-nav-link" onClick={() => setShowOffcanvas(false)}>
+                    <Nav.Link
+                      as={Link}
+                      to="/notifications"
+                      className="mobile-nav-link"
+                      onClick={() => setShowOffcanvas(false)}
+                    >
                       <FaBell className="me-3" />
                       Notifications
                       {unreadCount > 0 && (
@@ -396,23 +511,48 @@ const CustomNavbar = () => {
                         </Badge>
                       )}
                     </Nav.Link>
-                    <Nav.Link as={Link} to="/profile" className="mobile-nav-link" onClick={() => setShowOffcanvas(false)}>
+                    <Nav.Link
+                      as={Link}
+                      to="/profile"
+                      className="mobile-nav-link"
+                      onClick={() => setShowOffcanvas(false)}
+                    >
                       <FaUser className="me-3" />
                       Profile
                     </Nav.Link>
-                    <Nav.Link as={Link} to="/mylistings" className="mobile-nav-link" onClick={() => setShowOffcanvas(false)}>
+                    <Nav.Link
+                      as={Link}
+                      to="/mylistings"
+                      className="mobile-nav-link"
+                      onClick={() => setShowOffcanvas(false)}
+                    >
                       <FaListAlt className="me-3" />
                       My Listings
                     </Nav.Link>
-                    <Nav.Link as={Link} to="/claims" className="mobile-nav-link" onClick={() => setShowOffcanvas(false)}>
+                    <Nav.Link
+                      as={Link}
+                      to="/claims"
+                      className="mobile-nav-link"
+                      onClick={() => setShowOffcanvas(false)}
+                    >
                       <FaCheck className="me-3" />
                       My Claims
                     </Nav.Link>
-                    <Nav.Link as={Link} to="/settings" className="mobile-nav-link" onClick={() => setShowOffcanvas(false)}>
+                    <Nav.Link
+                      as={Link}
+                      to="/settings"
+                      className="mobile-nav-link"
+                      onClick={() => setShowOffcanvas(false)}
+                    >
                       <FaCog className="me-3" />
                       Settings
                     </Nav.Link>
-                    <Nav.Link as={Link} to="/help" className="mobile-nav-link" onClick={() => setShowOffcanvas(false)}>
+                    <Nav.Link
+                      as={Link}
+                      to="/help"
+                      className="mobile-nav-link"
+                      onClick={() => setShowOffcanvas(false)}
+                    >
                       <FaQuestionCircle className="me-3" />
                       Help
                     </Nav.Link>
@@ -420,8 +560,8 @@ const CustomNavbar = () => {
                 </div>
 
                 {/* Logout Button */}
-                <Button 
-                  variant="danger" 
+                <Button
+                  variant="danger"
                   className="mt-4 w-100"
                   onClick={handleLogout}
                 >
@@ -433,18 +573,18 @@ const CustomNavbar = () => {
           ) : (
             /* Mobile menu for non-logged in users */
             <Nav className="flex-column gap-3">
-              <Nav.Link 
-                as={Link} 
-                to="/login" 
+              <Nav.Link
+                as={Link}
+                to="/login"
                 className="mobile-nav-link text-center"
                 onClick={() => setShowOffcanvas(false)}
               >
                 <FaUser className="me-2" />
                 Login
               </Nav.Link>
-              <Nav.Link 
-                as={Link} 
-                to="/signup" 
+              <Nav.Link
+                as={Link}
+                to="/signup"
                 className="mobile-nav-link text-center"
                 onClick={() => setShowOffcanvas(false)}
               >
@@ -454,7 +594,8 @@ const CustomNavbar = () => {
               <div className="mt-4">
                 <h6 className="text-light">About FINDLY</h6>
                 <p className="text-light small">
-                  Reuniting lost items with their owners through smart matching and community collaboration.
+                  Reuniting lost items with their owners through smart matching
+                  and community collaboration.
                 </p>
               </div>
             </Nav>
