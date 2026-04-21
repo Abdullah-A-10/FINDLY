@@ -22,10 +22,25 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 
+const allowedOrigins = [
+  "https://findly-lostnfound.vercel.app",
+  "https://findly-lostnfound-i86o8vq9o-abdullah-a-10s-projects.vercel.app",
+  "http://localhost:5173" // Keep for local development
+];
+
 app.use(cors({
-  origin: "*",
-  credentials: true
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
