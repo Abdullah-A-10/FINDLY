@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const { pool } = require("../db");
 const authenticateUser = require("../middleware/authenticateUser");
 const { body, validationResult } = require("express-validator");
-const upload  = require("../middleware/upload");
+const upload = require("../middleware/upload");
 const router = express.Router();
 
 // User Registration
@@ -84,6 +84,7 @@ router.post(
     body("password").notEmpty().withMessage("Password is required"),
   ],
   async (req, res) => {
+    return res.status(200).json({ message: "CORS is working!" });
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -93,10 +94,9 @@ router.post(
 
     try {
       // Find user
-      const [users] = await pool.query(
-        "SELECT * FROM users WHERE email = ?",
-        [email],
-      );
+      const [users] = await pool.query("SELECT * FROM users WHERE email = ?", [
+        email,
+      ]);
 
       if (users.length === 0) {
         return res.status(401).json({ error: "Invalid email or password" });
@@ -128,7 +128,7 @@ router.post(
           username: user.username,
           email: user.email,
           phone: user.phone,
-          profile_pic: user.profile_pic
+          profile_pic: user.profile_pic,
         },
       });
     } catch (error) {
