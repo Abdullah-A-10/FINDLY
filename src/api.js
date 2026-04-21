@@ -1,6 +1,6 @@
 import axios from "axios";
 const api = axios.create({
-  baseURL: "https://findly-lostnfound.vercel.app/api",
+  baseURL: "/api",
   timeout: 10000,
   withCredentials: true,
 });
@@ -30,6 +30,6 @@ api.interceptors.response.use(
 );
 
 export const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL || "https://findly-lostnfound.vercel.app/api";
+  import.meta.env.VITE_BACKEND_URL || "http:localhost:5000/api";
 
 export default api;

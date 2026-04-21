@@ -22,12 +22,55 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 
-const allowedOrigins = [
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Connect to database
+connectDB();
+
+// Schedule cleanup job
+scheduleWindow();
+
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/items", itemsRoutes);
+
+// Health check
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Root route
+app.get("/", (req, res) => {
+  res.json({
+    message: "FINDLY Backend API !",
+    version: "1.0.0",
+  });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Something went wrong!" });
+});
+
+/* Start server*/
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+module.exports = app;
+
+/*const allowedOrigins = [
   "https://findlylostnfound-ebon.vercel.app", // Your frontend URL from the screenshot
   "http://localhost:5173", // For local development
 ];
 
-/*app.use(
+app.use(
   cors({
     origin: function (origin, callback) {
       // Allow requests with no origin (like mobile apps or curl requests)
@@ -59,45 +102,3 @@ const allowedOrigins = [
   }
   next();
 });*/
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Connect to database
-connectDB();
-
-// Schedule cleanup job
-scheduleWindow();
-
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/items", itemsRoutes);
-
-// Health check
-app.get("/api/health", (req, res) => {
-  res.json({
-    status: "ok",
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// Root route
-app.get("/login", (req, res) => {
-  res.json({
-    message: "FINDLY Backend API !",
-    version: "1.0.0",
-  });
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: "Something went wrong!" });
-});
-
-/* Start server*/
-if (process.env.NODE_ENV !== "production") {
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-}
-
-module.exports = app;
