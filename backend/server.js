@@ -82,7 +82,7 @@ app.get("/api/health", (req, res) => {
 });
 
 // Root route
-app.get("/", (req, res) => {
+app.get("/login", (req, res) => {
   res.json({
     message: "FINDLY Backend API !",
     version: "1.0.0",
