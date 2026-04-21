@@ -30,6 +30,6 @@ api.interceptors.response.use(
 );
 
 export const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  import.meta.env.VITE_BACKEND_URL || "https://findly-lostnfound.vercel.app/api";
 
 export default api;
