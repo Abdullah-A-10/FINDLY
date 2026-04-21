@@ -27,7 +27,7 @@ const allowedOrigins = [
   "http://localhost:5173", // For local development
 ];
 
-app.use(
+/*app.use(
   cors({
     origin: function (origin, callback) {
       // Allow requests with no origin (like mobile apps or curl requests)
@@ -43,9 +43,9 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
-);
+);*/
 
-app.use((req, res, next) => {
+/*app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
@@ -58,7 +58,7 @@ app.use((req, res, next) => {
     return res.status(200).end();
   }
   next();
-});
+});*/
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
