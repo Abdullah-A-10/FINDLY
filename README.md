@@ -13,43 +13,40 @@ FINDLY solves this problem by providing a structured system where users can repo
 
 ---
 
+## 🚀 Live Demo
+
+🌐 **Try FINDLY here:**  
+👉 https://findly-lostandfound.vercel.app/
+
+> ⚠️ Note: The app is hosted on a free deployment platform, so initial load may take a few seconds or a refresh !
+
+---
+
 ## 🚀 Core Features
 
-- 🔐 User Authentication (Signup / Login)
-- 📄 Report Lost & Found Items
-- 🧠 Automatic Smart Matching of Lost & Found Items
-- 📨 Match & Claim Notifications
-- ✅ Secure Claim Verification System
-- 👤 User Profile & Account Management
-- 🖼️ Item Image Uploads
-- 📱 Responsive & User-Friendly Interface
+- 🔐 User Authentication (Signup / Login)  
+- 📄 Report Lost & Found Items  
+- 🧠 Automatic Smart Matching of Lost & Found Items  
+- 📨 Match & Claim Notifications  
+- ✅ Secure Claim Verification System  
+- 👤 User Profile & Account Management  
+- 🖼️ Item Image Uploads  
+- 📱 Responsive & User-Friendly Interface  
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- ⚛ **React (Vite)** – Modern UI library
-- 💻 **JavaScript (ES6+)** – Frontend logic
-- 🌐 **HTML5** – Markup
-- 🎨 **CSS3 / Tailwind** – Styling
+- ⚛ **React JS (Vite)** – Modern Javascript UI library  
+- 🎨 **CSS3 / Tailwind** – Styling  
 
 ### Backend
-- 🟢 **Node.js** – Runtime environment
-- ⚡ **Express.js** – Web framework
-- 🐬 **MySQL** – Relational database
-- 🔑 **JWT Authentication** – Secure user sessions
-- 📂 **Multer** – File upload handling
-
----
-
-## 🧪 Project Status
-
-✅ Core functionality complete
-
-✅ Fully working locally
-
-🚧 Deployment optional / in progress
+- 🟢 **Node.js** – Runtime environment  
+- ⚡ **Express.js** – Web framework  
+- 🐬 **MySQL** – Relational database  
+- 🔑 **JWT Authentication** – Secure user sessions  
+- 📂 **Multer** – File upload handling   
 
 ---
 
@@ -57,21 +54,21 @@ FINDLY solves this problem by providing a structured system where users can repo
 
 This project was developed as a Database Systems & Full-Stack Development course project, focusing on:
 
-Practical database design
-
-Backend-frontend integration
-
-Real-world application logic
+- Practical database design  
+- Backend-frontend integration  
+- Real-world application logic  
 
 ---
+
 ## 👤 Author
 
-Abdullah Aamir ,
-Computer Science Student ,
-Full-Stack Developer
+**Abdullah Aamir**  
+Computer Science Student | Full-Stack Developer  
 
-🔗 GitHub: https://github.com/Abdullah-A-10
+🔗 GitHub: https://github.com/Abdullah-A-10  
 
-⭐ Support
+---
+
+## ⭐ Support
 
 If you find this project useful, consider giving it a ⭐ on GitHub.
