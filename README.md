@@ -1,5 +1,3 @@
-<img width="1125" height="525" alt="ERDFindly" src="https://github.com/user-attachments/assets/feee2e2f-219b-40d5-aabd-5e5f78ccf13a" />
-<img width="1125" height="525" alt="ERDFindly" src="https://github.com/user-attachments/assets/f9616127-28cc-4411-b500-69e426be96ed" />
 # 🔍 A Full-Stack Lost & Found Management System
 
 FINDLY is a web-based Lost & Found platform that helps users report, search, match, and claim lost or found items efficiently.  
