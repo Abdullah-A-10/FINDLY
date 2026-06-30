@@ -1,4 +1,4 @@
-# FINDLY 🔍📦  
+<img width="806" height="623" alt="Listings" src="https://github.com/user-attachments/assets/ab885a9c-08de-4298-bc4d-a2d79f757810" /># FINDLY 🔍📦  
 A Full-Stack Lost & Found Management System
 
 FINDLY is a web-based Lost & Found platform that helps users report, search, match, and claim lost or found items efficiently.  
@@ -32,6 +32,57 @@ FINDLY solves this problem by providing a structured system where users can repo
 - 👤 User Profile & Account Management  
 - 🖼️ Item Image Uploads  
 - 📱 Responsive & User-Friendly Interface  
+
+---
+
+## 🖥️ Visual Preview
+
+### 🏠 Home Page
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/535a3f3d-1955-423a-b3b5-ee876b31e417" alt="Home" max-width="100%" height="auto" />
+</p>
+
+---
+
+### 🔐 Login & Authentication
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/64d73cb1-aa72-4029-a3e3-be7c69e9e3a1" alt="Login" max-width="100%" height="auto" />
+</p>
+
+---
+
+### 📊 User Dashboard
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/9de21510-b4ea-4dc3-bbf2-c7f5bf507b51" alt="Dashboard" max-width="100%" height="auto" />
+</p>
+
+---
+
+### 📋 Report Item
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1a785b5d-1d59-4441-9e93-5aec5e3ac074" alt="Report" max-width="100%" height="auto" />
+</p>
+
+---
+
+### 🗂️ Item Listings
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1a5e262f-fdf5-4125-bce5-cdd199b134a5" alt="Listings" max-width="100%" height="auto" />
+</p>
+
+---
+
+### 🤝 Match & Verification
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1c72890d-484f-414a-81b6-fbeb7c36638c" alt="Match" max-width="100%" height="auto" />
+</p>
+
+---
+
+### 📥 Claims Management
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/749b594e-6bc0-4b29-80bc-497b73eff1be" alt="Claim" max-width="100%" height="auto" />
+</p>
 
 ---
 
