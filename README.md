@@ -17,8 +17,6 @@ FINDLY solves this problem by providing a structured system where users can repo
 🌐 **Try FINDLY here:**  
 👉 https://findly-lostandfound.vercel.app/
 
-> ⚠️ Note: The app is hosted on a free deployment platform, so initial load may take a few seconds or a refresh !
-
 ---
 
 ## 🚀 Core Features
