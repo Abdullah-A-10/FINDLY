@@ -1,3 +1,5 @@
+<img width="1125" height="525" alt="ERDFindly" src="https://github.com/user-attachments/assets/feee2e2f-219b-40d5-aabd-5e5f78ccf13a" />
+<img width="1125" height="525" alt="ERDFindly" src="https://github.com/user-attachments/assets/f9616127-28cc-4411-b500-69e426be96ed" />
 # 🔍 A Full-Stack Lost & Found Management System
 
 FINDLY is a web-based Lost & Found platform that helps users report, search, match, and claim lost or found items efficiently.  
@@ -100,11 +102,19 @@ FINDLY solves this problem by providing a structured system where users can repo
 
 ## 🎓 Academic Context
 
-This project was developed as a Database Systems & Full-Stack Development course project, focusing on:
+This project was developed as part of a **Database Systems & Full-Stack Development** course, with a core focus on implementing industry-standard architectural practices:
 
-- Practical database design  
-- Backend-frontend integration  
-- Real-world application logic  
+* 🗄️ **Relational Database Design** – Architecting robust schemas, establishing data integrity, and optimizing queries.
+* ⚙️ **Full-Stack Integration** – Bridging the gap between secure backend APIs and dynamic, responsive frontends.
+* 🧠 **Real-World Application Logic** – Translating complex user workflows into clean, functional code.
+
+---
+
+### 🗺️ Entity-Relationship Diagram (ERD)
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/388891b6-60dd-415f-b56d-3b949791b293" alt="ERD Schema" max-width="100%" height="auto" />
+</p>
 
 ---
 
