@@ -1,5 +1,4 @@
-<img width="806" height="623" alt="Listings" src="https://github.com/user-attachments/assets/ab885a9c-08de-4298-bc4d-a2d79f757810" /># FINDLY 🔍📦  
-A Full-Stack Lost & Found Management System
+# 🔍 A Full-Stack Lost & Found Management System
 
 FINDLY is a web-based Lost & Found platform that helps users report, search, match, and claim lost or found items efficiently.  
 The system is designed to simulate a real-world campus/city-level lost & found solution with secure authentication, smart matching logic, and a clean user experience.
